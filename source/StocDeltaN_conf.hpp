@@ -2,8 +2,8 @@
 #define INCLUDED_StocDeltaN_hpp_
 
 #include <sys/time.h>
-#include "JacobiPDE_conf_0.2.0.hpp"
-#include "SRK32_conf_0.1.0.hpp"
+#include "JacobiPDE_conf.hpp"
+#include "SRK32_conf.hpp"
 
 class StocDeltaN: virtual public JacobiPDE, virtual public SRKintegrater
 {

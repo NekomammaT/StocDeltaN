@@ -2,8 +2,8 @@
 #define INCLUDED_StocDeltaN_hpp_
 
 #include <sys/time.h>
-#include "JacobiPDE_0.4.1.hpp"
-#include "SRK32_0.4.0.hpp"
+#include "JacobiPDE.hpp"
+#include "SRK32.hpp"
 
 class StocDeltaN: virtual public JacobiPDE, virtual public SRKintegrater
 {
@@ -146,8 +146,10 @@ void StocDeltaN::solve()
 	  dataNo++;
 	}
       }
-      
-      dN2 /= dataNo;
+
+      if (dataNo != 0) {
+	dN2 /= dataNo;
+      }
       dN2List[i].push_back({N,dN2});
     }
 
@@ -167,12 +169,16 @@ void StocDeltaN::solve()
 
   for (int list=0; list<dN2List[0].size(); list++) {
     meandN2 = 0;
+    recNo = 0;
 
     for (int i=0; i<recursion; i++) {
       meandN2 += dN2List[i][list][1];
+      if (dN2List[i][list][1] != 0) {
+	recNo++;
+      }
     }
 
-    meandN2 /= recursion;
+    meandN2 /= recNo;
     calPfile << dN2List[0][list][0] << ' ' << meandN2 << ' ' << (meandN2-predN2)/deltaN << endl;
     predN2 = meandN2;
   }
