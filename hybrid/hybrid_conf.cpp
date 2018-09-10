@@ -2,12 +2,12 @@
 
 #define MODEL "hybrid_conf"
 
-#define PHIMIN 0.141
+#define PHIMIN 0.1409
 #define PHIMAX 0.142
-#define PSIMIN -(2e-5)
-#define PSIMAX (2e-5)
+#define PSIMIN -(1e-3)
+#define PSIMAX (1e-3)
 #define HPHI (1e-5)
-#define HPSIOPSI 10
+#define HPSIOPSI (1e-2)
 #define HPSIMIN (1e-10)
 
 #define MAXSTEP 100000
@@ -21,12 +21,12 @@
 #define MU1 (PI2/MM/MM/PHIC)
 #define LAMBDA4 (AS*12*M_PI*M_PI/MU1/MU1)
 
-#define RHOC (2.07403813e-16)
+#define RHOC (2.074038e-16) //(2.07403813e-16)
 
 #define RECURSION 10000
 #define PHIIN 0.1418
 #define PSIIN 0
-#define TIMESTEP (1e-2)
+#define TIMESTEP (1e-3)
 
 #define DELTAN 0.1
 #define NMAX 28
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
   sitev = PSIMIN;
   while (sitev <= PSIMAX) {
-    h = max({fabs(sitev)/HPSIOPSI,HPSIMIN});
+    h = max(fabs(sitev)*HPSIOPSI,HPSIMIN);
 
     //cout << sitev << ' ' << flush;
     site.push_back(sitev);
