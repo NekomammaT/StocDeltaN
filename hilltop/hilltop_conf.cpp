@@ -7,7 +7,7 @@
 #define HMIN (1e-8)
 #define HOV (1./20)
 
-#define MAXSTEP 1000000
+#define MAXSTEP 10000000
 #define TOL 1e-10
 
 #define LAMBDA 0.01
