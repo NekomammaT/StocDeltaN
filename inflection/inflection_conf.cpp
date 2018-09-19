@@ -3,11 +3,11 @@
 #define MODEL "inflection_conf"
 
 #define XMIN 0.3
-#define XMAX 6
-#define FINEXMIN 0.6
-#define FINEXMAX 1
-#define HX (1e-2)
-#define FINEHX (1e-4)
+#define XMAX 1.1
+//#define FINEXMIN 0.6
+//#define FINEXMAX 1
+#define HX (1e-4)
+//#define FINEHX (1e-4)
 
 #define MAXSTEP 100000
 #define TOL 1e-10
@@ -23,7 +23,7 @@
 #define RHOC (3*HF*HF)
 
 #define RECURSION 100
-#define XIN 5
+#define XIN 1
 #define TIMESTEP (1e-2)
 
 #define DELTAN 0.1
@@ -40,15 +40,17 @@ int main(int argc, char** argv)
   before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
 
 
-  double h, sitev = XMIN;
+  double h = HX, sitev = XMIN;
   vector<double> site;
   vector< vector<double> > sitepack;
   while (sitev <= XMAX) {
+    /*
     if (FINEXMIN <= sitev && sitev <= FINEXMAX) {
       h = FINEHX;
     } else {
       h = HX;
     }
+    */
     
     site.push_back(sitev);
     sitev += h;
