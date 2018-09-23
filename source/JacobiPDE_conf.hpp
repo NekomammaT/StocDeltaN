@@ -18,7 +18,7 @@ class JacobiPDE
 protected:
   vector<double> f1, f1_next, g2, g2_next; // argument: number
   vector< vector<double> > site, hI; // argument: I, siteNo
-  vector<double> FPoint, exportdx; // argument: I
+  vector<double> FPoint; // argument: I
   vector<bool> Omega; // argument: number
   vector<int> ind; // argument: I
   vector<int> siteNo; // argument: I

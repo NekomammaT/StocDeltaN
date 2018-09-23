@@ -15,7 +15,7 @@ protected:
 public:
   StocDeltaN(){}
   StocDeltaN(string Model,
-	     vector< vector<double> > Site[], double Rhoc, vector<double> Exportdx[],
+	     vector< vector<double> > Site[], double Rhoc,
 	     vector<double> &Xi, vector<double> &Pi, double T0, int NoiseDim,
 	     double Maxstep, double Tol, int Recursion,
 	     double Timestep, double NNmax, double DeltaN);
@@ -43,11 +43,11 @@ public:
 
 
 StocDeltaN::StocDeltaN(string Model,
-		       vector< vector<double> > Site[], double Rhoc, vector<double> Exportdx[],
+		       vector< vector<double> > Site[], double Rhoc,
 		       vector<double> &Xi, vector<double> &Pi, double T0, int NoiseDim,
 		       double Maxstep, double Tol, int Recursion,
 		       double Timestep, double NNmax, double DeltaN):
-  JacobiPDE(Site,Rhoc,Exportdx), SRKintegrater(Xi,Pi,T0,NoiseDim)
+  JacobiPDE(Site,Rhoc), SRKintegrater(Xi,Pi,T0,NoiseDim)
 {
   model = Model;
   maxstep = Maxstep;

@@ -18,7 +18,7 @@ class JacobiPDE
 protected:
   vector<double> f1, f1_next, g2, g2_next; // argument: number
   vector< vector<double> > site[2], hI[2]; // argument: x or p, I, siteNo
-  vector<double> FPoint[2], exportdx[2]; // argument: x or p, I
+  vector<double> FPoint[2]; // argument: x or p, I
   vector<bool> Omega; // argument: number
   vector<int> ind[2]; // argument: x or p, I
   vector<int> siteNo[2]; // argument: x or p, I
@@ -27,7 +27,7 @@ protected:
   
 public:
   JacobiPDE(){}
-  JacobiPDE(vector< vector<double> > Site[], double Rhoc, vector<double> Exportdx[]);
+  JacobiPDE(vector< vector<double> > Site[], double Rhoc);
   void init_fn();
   double PDE(int number, int n);
   void PDE_solve(int maxstep, double tol, int n);
@@ -43,7 +43,7 @@ public:
   double return_g2(vector<int> index[]);
   double return_err();
   void export_fg(string filename);
-  double H(vector<double> &X, vector<double> &P);
+  virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
   virtual double metric(vector<double> &X, int I, int J);
@@ -59,6 +59,19 @@ public:
 
 
 // ---------------------- sample ------------------------
+
+double JacobiPDE::H(vector<double> &X, vector<double> &P)
+{
+  double rho = V(X);
+
+  for (int I=0; I<X.size(); I++) {
+    for (int J=0; J<X.size(); J++) {
+      rho += 1./2*inversemetric(X,I,J)*P[I]*P[J];
+    }
+  }
+
+  return sqrt(rho/3.);
+}
 
 double JacobiPDE::V(vector<double> &X)
 {
@@ -185,7 +198,7 @@ double JacobiPDE::Dpipi(vector<double> &X, vector<double> &P, int I, int J)
 
 
 
-JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc, vector<double> Exportdx[])
+JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
 {
   srand((unsigned)time(NULL));
 
@@ -205,8 +218,6 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc, vector<double
   ind[1] = vector<int>(dim,0);
   FPoint[0] = vector<double>(dim,0);
   FPoint[1] = vector<double>(dim,0);
-  exportdx[0] = Exportdx[0];
-  exportdx[1] = Exportdx[1];
 
   for (int xp=0; xp<2; xp++) {
     for (int I=0; I<dim; I++) {
@@ -793,81 +804,16 @@ void JacobiPDE::export_fg(string filename)
 {
   ofstream ofs(filename);
 
-  vector<int> explist(volume,0), nextlist;
-  double nextx, nextp, prex, prep;
-
   for (int number=0; number<volume; number++) {
-    explist[number] = number;
-  }
-
-  
-  for (int I=0; I<dim; I++) {
-    nextx = site[0][I][0];
-    nextp = site[1][I][0];
-    prex = nextx;
-    prep = nextp;
-    
-    for (int i=0; i<explist.size(); i++) {
-      if (nextx > site[0][I][site[0][I].size()-1] && No2X(explist[i],I) < prex) {
-	nextx = site[0][I][0];
-      }
-      
-      if (No2X(explist[i],I) >= nextx || No2X(explist[i],I) == prex) {
-	nextlist.push_back(explist[i]);
-	prex = No2X(explist[i],I);
-
-	if (nextx <= prex) {
-	  nextx += exportdx[0][I];
-	}
-      }
-    }
-    explist.clear();
-    explist = nextlist;
-    nextlist.clear();
-
-    for (int i=0; i<explist.size(); i++) {
-      if (nextp > site[1][I][site[1][I].size()-1] && No2P(explist[i],I) < prep) {
-	nextp = site[1][I][0];
-      }
-      
-      if (No2P(explist[i],I) >= nextp || No2P(explist[i],I) == prep) {
-	nextlist.push_back(explist[i]);
-	prep = No2P(explist[i],I);
-
-	if (nextp <= prep) {
-	  nextp += exportdx[1][I];
-	}
-      }
-    }
-    explist.clear();
-    explist = nextlist;
-    nextlist.clear();
-  }
-  
-  
-  for (int i=0; i<explist.size(); i++) {
     for (int I=0; I<dim; I++) {
-      ofs << No2X(explist[i],I) << ' ';
+      ofs << No2X(number,I) << ' ';
     }
     for (int I=0; I<dim; I++) {
-      ofs << No2P(explist[i],I) << ' ';
+      ofs << No2P(number,I) << ' ';
     }
-    ofs << f1[explist[i]] << ' '
-	<< g2[explist[i]] << endl;
+    ofs << f1[number] << ' '
+	<< g2[number] << endl;
   }
-}
-
-double JacobiPDE::H(vector<double> &X, vector<double> &P)
-{
-  double rho = V(X);
-
-  for (int I=0; I<X.size(); I++) {
-    for (int J=0; J<X.size(); J++) {
-      rho += 1./2*inversemetric(X,I,J)*P[I]*P[J];
-    }
-  }
-
-  return sqrt(rho/3.);
 }
 
 #endif

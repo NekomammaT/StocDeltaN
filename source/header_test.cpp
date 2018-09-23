@@ -1,4 +1,4 @@
-#include "JacobiPDE_conf_0.2.0.hpp"
+#include "JacobiPDE.hpp"
 
 int main(int argc, char** argv)
 {

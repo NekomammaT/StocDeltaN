@@ -4,16 +4,15 @@
 
 #define XMIN 0.3
 #define XMAX 6
-#define FINEXMIN 0.6
-#define FINEXMAX 1.1
 #define PMIN -20
 #define PMAX -10
-#define FINEPMIN -14
-#define FINEPMAX -10
-#define HX 0.01
-#define FINEHX 1e-3
-#define HP 0.1
-#define FINEHP 1e-3
+#define PC -12
+#define HXOV 0.01
+#define HXMIN (1e-4)
+#define HXMAX 0.1
+#define HPOV 0.01
+#define HPMIN (1e-2)
+#define HPMAX 0.01
 #define MAXSTEP 100000
 #define TOL 1e-10
 
@@ -31,12 +30,10 @@
 #define RECURSION 1000
 #define PHIIN 5
 #define PIN -12
-#define TIMESTEP (1e-2)
+#define TIMESTEP (1e-3)
 
 #define DELTAN 0.01
 #define NMAX 55
-#define DX HX
-#define DP HP
 
 
 int main(int argc, char** argv)
@@ -53,40 +50,30 @@ int main(int argc, char** argv)
   vector<double> site;
   vector< vector<double> > sitepack[2];
   while (sitev <= XMAX) {
-    if (FINEXMIN <= sitev && sitev <= FINEXMAX) {
-      h = FINEHX;
-    } else {
-      h = HX;
-    }
-    
+    h = min(max(fabs(sitev-PHIC)*HXOV, HXMIN), HXMAX);
+
+    //cout << sitev << ' ' << flush;
     site.push_back(sitev);
     sitev += h;
   }
+  //cout << endl;
   sitepack[0].push_back(site);
   site.clear();
 
   sitev = PMIN;
   while (sitev <= PMAX) {
-    if (FINEPMIN <= sitev && sitev <= FINEPMAX) {
-      h = FINEHP;
-    } else {
-      h = HP;
-    }
-
+    h = min(max(fabs(sitev-PC)*HPOV, HPMIN), HPMAX);
+    
     site.push_back(sitev);
     sitev += h;
   }
   sitepack[1].push_back(site);
   site.clear();
-  
-  vector<double> dx[2];
-  dx[0].push_back(DX);
-  dx[1].push_back(DP);
 
   vector<double> xi = {PHIIN};
   vector<double> pi = {PIN};
   
-  StocDeltaN sdn(MODEL,sitepack,RHOC,dx,xi,pi,0,NOISEDIM,MAXSTEP,TOL,RECURSION,
+  StocDeltaN sdn(MODEL,sitepack,RHOC,xi,pi,0,NOISEDIM,MAXSTEP,TOL,RECURSION,
 		 TIMESTEP,NMAX,DELTAN);
   
   //sdn.sample();
