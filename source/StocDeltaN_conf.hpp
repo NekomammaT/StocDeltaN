@@ -1,7 +1,6 @@
 #ifndef INCLUDED_StocDeltaN_hpp_
 #define INCLUDED_StocDeltaN_hpp_
 
-#include <sys/time.h>
 #include "JacobiPDE_conf.hpp"
 #include "SRK32_conf.hpp"
 

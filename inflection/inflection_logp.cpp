@@ -11,8 +11,8 @@
 #define HXMIN (1e-4)
 #define HXMAX 0.1
 #define HPOV 0.01
-#define HPMIN (1e-2)
-#define HPMAX 0.01
+#define HPMIN (1e-3)
+#define HPMAX 0.1
 #define MAXSTEP 100000
 #define TOL 1e-10
 
