@@ -386,9 +386,9 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
     err = sqrt(err)/sqrt(u_norm);
 
     if (n == 1) {
-      cout << "\rerr for f1: " << setw(11) << left << err << "  step: " << step << flush;
+      cout << "\rerr for M1: " << setw(11) << left << err << "  step: " << step << flush;
     } else if (n == -2) {
-      cout << "\rerr for g2: " << setw(11) << left << err << "  step: " << step << flush;
+      cout << "\rerr for C2: " << setw(11) << left << err << "  step: " << step << flush;
     }
     
     if (err < tol) {
