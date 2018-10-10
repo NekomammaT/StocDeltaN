@@ -30,10 +30,10 @@ Then executing the program by typing e.g. `./a.out`, the status like the followi
     
 Obtained results are output into three files named `Mn_"model name".dat`, `traj_"model name".dat`, and `calP_"model name".dat` in the same directory of the code.  
 * `Mn_"model name".dat` : contour data of Mn = <N^n> and C2 = <\delta N^2>  
-`phi^1, phi^2, ... , pi^1, pi^2, ... , M1, C2`
+`phi^1, phi^2, ... , M1, C2`
     
 * `traj_"model name".dat` : trajectory data of one sample path  
-`N, phi^1, phi^2, ... , pi^1, pi^2, ...`
+`N, phi^1, phi^2, ...`
     
 * `calP_"model name".dat` : data of curvature perturbation  
 `<N>, <\delta N^2>, \mathcal{P}_\zeta`
