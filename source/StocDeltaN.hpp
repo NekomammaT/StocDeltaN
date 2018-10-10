@@ -97,7 +97,7 @@ void StocDeltaN::solve()
   PDE_solve(maxstep,tol,-2);
   cout << "\rerr for g2: " << return_err() << endl;
   
-  string str = "fn_" + model + ".dat";
+  string str = "Mn_" + model + ".dat";
   
   export_fg(str); // export f1 and g2 to file
   

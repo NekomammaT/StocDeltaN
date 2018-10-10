@@ -86,7 +86,7 @@ void StocDeltaN::solve()
   PDE_solve(maxstep,tol,1); //solve f1
   PDE_solve(maxstep,tol,-2);
   
-  string str = "fn_" + model + ".dat";
+  string str = "Mn_" + model + ".dat";
   
   export_fg(str); // export f1 and g2 to file
   
