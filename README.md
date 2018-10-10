@@ -23,7 +23,7 @@ for Intel compiler
 
     icpc -std=c++11 -qopenmp sample_DC_conf.cpp
 
-Then executing the program by typing e.g. `./a`, the status like the followings will be shown gradually.
+Then executing the program by typing e.g. `./a.out`, the status like the followings will be shown gradually.
 
     OpenMP : Enabled (Max # of threads = 4) // only when using OpenMP
     sample_DC_conf
@@ -32,3 +32,4 @@ Then executing the program by typing e.g. `./a`, the status like the followings 
     err for C2: 3.23057e-12  step: 387
     100/100
     
+Obtained results are output into three files named 
