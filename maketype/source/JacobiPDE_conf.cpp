@@ -99,7 +99,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > &Site, double Rhoc)
   for (int I=0; I<dim; I++) {
     siteNo[I] = site[I].size();
     
-    for (int s=0; s<site[I].size()-1; s++) {
+    for (int s=0, smax=site[I].size()-1; s<smax; s++) {
       hI[I][s] = site[I][s+1] - site[I][s];
     }
   }
@@ -130,22 +130,103 @@ JacobiPDE::JacobiPDE(vector< vector<double> > &Site, double Rhoc)
       g2[number] = (rand()%10)/10.;
     }
   }
+
+  // -------------- reflecting b.c. --------------
+
+  numXp
+    = vector< vector<int> >(volume, vector<int>(dim,0));
+  numXm = numXp;
+  numXXpp
+    = vector< vector< vector<int> > >(volume, vector< vector<int> >(dim, vector<int>(dim,0)));
+  numXXpm = numXXpp;
+  numXXmm = numXXpp;
+  hp = vector< vector<double> >(volume, vector<double>(dim,0));
+  hm = hp;
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+  for (int number=0; number<volume; number++) {
+    vector<int> ind0 = ind,indXm,indXp,indXXpp,indXXpm,indXXmm;
+    
+    for (int I=0; I<dim; I++) {
+      ind0[I] = No2XInd(number,I);
+    }
+
+    for (int I=0; I<dim; I++) {
+      indXm = ind0;
+      indXp = ind0;
+
+      for (int J=0; J<dim; J++) {
+	if (J != I) {
+	  indXXpp = ind0;
+	  indXXpm = ind0;
+	  indXXmm = ind0;
+	  
+	  if (ind0[I] == 0) {
+	    indXXmm[I]++;
+	  } else {
+	    indXXmm[I]--;
+	  }
+	  if (ind0[I] == siteNo[I]-1) {
+	    indXXpp[I]--;
+	    indXXpm[I]--;
+	  } else {
+	    indXXpp[I]++;
+	    indXXpm[I]++;
+	  }
+	  
+	  if (ind0[J] == 0) {
+	    indXXpm[J]++;
+	    indXXmm[J]++;
+	  } else {
+	    indXXpm[J]--;
+	    indXXmm[J]--;
+	  }
+	  if (ind0[J] == siteNo[J]-1) {
+	    indXXpp[J]--;
+	  } else {
+	    indXXpp[J]++;
+	  }
+	  
+	  numXXpp[number][I][J] = Ind2No(indXXpp);
+	  numXXpm[number][I][J] = Ind2No(indXXpm);
+	  numXXmm[number][I][J] = Ind2No(indXXmm);
+	}
+      }
+      
+      if (ind0[I] == 0) {
+	indXm[I]++;
+	hm[number][I] = hI[I][ind0[I]];
+      } else {
+	indXm[I]--;
+	hm[number][I] = hI[I][ind0[I]-1];
+      }
+
+      if (ind0[I] == siteNo[I]-1) {
+	indXp[I]--;
+	hp[number][I] = hI[I][ind0[I]-1];
+      } else {
+	indXp[I]++;
+	hp[number][I] = hI[I][ind0[I]];
+      }
+      
+      numXp[number][I] = Ind2No(indXp);
+      numXm[number][I] = Ind2No(indXm);
+    }
+  }
 }
 
 double JacobiPDE::PDE(int number, int n)
 {
-  vector<int> ind0;
   vector<double> FPoint0;
 
-  ind0 = ind;
   FPoint0 = FPoint;
   
   for (int I=0; I<dim; I++) {
-    ind0[I] = No2XInd(number,I);
     FPoint0[I] = No2X(number,I);
   }
   
-  vector<int> indXIm, indXIp, indXJm, indXJp, indXXmm, indXXmp, indXXpm, indXXpp;
   double uXIm, uXIp, uXXmm, uXXmp, uXXpm, uXXpp, hXIp, hXIm, hXJp, hXJm;
   double uij = 0, coeff = 0;
 
@@ -154,35 +235,15 @@ double JacobiPDE::PDE(int number, int n)
   } // Cn
   
   for (int I=0; I<dim; I++) {
-    indXIm = ind0;
-    indXIp = ind0;
+    hXIp = hp[number][I];
+    hXIm = hm[number][I];
     
-    // -------------- reflecting b.c. -----------------
-    
-    if (indXIm[I] == 0) {
-      indXIm[I]++;
-      hXIm = hI[I][ind0[I]];
-    } else {
-      indXIm[I]--;
-      hXIm = hI[I][ind0[I]-1];
-    }
-
-    if (indXIp[I] == siteNo[I]-1) {
-      indXIp[I]--;
-      hXIp = hI[I][ind0[I]-1];
-    } else {
-      indXIp[I]++;
-      hXIp = hI[I][ind0[I]];
-    }
-
-    // ----------------------------------------------
-
     if (n == 1) {
-      uXIm = f1[Ind2No(indXIm)];
-      uXIp = f1[Ind2No(indXIp)];
+      uXIm = f1[numXm[number][I]];
+      uXIp = f1[numXp[number][I]];
     } else if (n == -2) {
-      uXIm = g2[Ind2No(indXIm)];
-      uXIp = g2[Ind2No(indXIp)];
+      uXIm = g2[numXm[number][I]];
+      uXIp = g2[numXp[number][I]];
     }
 
     if (Dphi(FPoint0,I) < 0 ) {
@@ -198,93 +259,29 @@ double JacobiPDE::PDE(int number, int n)
     
     
     for (int J=0; J<dim; J++) {
-      indXJm = ind0;
-      indXJp = ind0;
-      indXXmm = ind0;
-      indXXmp = ind0;
-      indXXpm = ind0;
-      indXXpp = ind0;
-      
-      // -------------------- reflecting b.c. --------------------
-      
-      if (indXJm[J] == 0) {
-	indXJm[J]++;
-	hXJm = hI[J][ind0[J]];
-      } else {
-	indXJm[J]--;
-	hXJm = hI[J][ind0[J]-1];
-      }
-      if (indXJp[J] == siteNo[J]-1) {
-	indXJp[J]--;
-	hXJp = hI[J][ind0[J]-1];
-      } else {
-	indXJp[J]++;
-	hXJp = hI[J][ind0[J]];
-      }
-      
-      if (indXXmm[I] == 0) {
-	indXXmm[I]++;
-      } else {
-	indXXmm[I]--;
-      }
-      if (indXXmp[I] == 0) {
-	indXXmp[I]++;
-      } else {
-	indXXmp[I]--;
-      }
-      if (indXXpm[I] == siteNo[I]-1) {
-	indXXpm[I]--;
-      } else {
-	indXXpm[I]++;
-      }
-      if (indXXpp[I] == siteNo[I]-1) {
-	indXXpp[I]--;
-      } else {
-	indXXpp[I]++;
-      }
-      
-      if (indXXmm[J] == 0) {
-	indXXmm[J]++;
-      } else {
-	indXXmm[J]--;
-      }
-      if (indXXpm[J] == 0) {
-	indXXpm[J]++;
-      } else {
-	indXXpm[J]--;
-      }
-      if (indXXmp[J] == siteNo[J]-1) {
-	indXXmp[J]--;
-      } else {
-	indXXmp[J]++;
-      }
-      if (indXXpp[J] == siteNo[J]-1) {
-	indXXpp[J]--;
-      } else {
-	indXXpp[J]++;
-      }
+      hXJp = hp[number][J];
+      hXJm = hm[number][J];
 
-      // ----------------------------------
-
-      if (n == 1) {
-	uXXmm = f1[Ind2No(indXXmm)];
-	uXXmp = f1[Ind2No(indXXmp)];
-	uXXpm = f1[Ind2No(indXXpm)];
-	uXXpp = f1[Ind2No(indXXpp)];
-      } else if (n == -2) {
-	uXXmm = g2[Ind2No(indXXmm)];
-	uXXmp = g2[Ind2No(indXXmp)];
-	uXXpm = g2[Ind2No(indXXpm)];
-	uXXpp = g2[Ind2No(indXXpp)];
-      }
-             
       if (J != I) {
-	uij -= 1./2*Dphiphi(FPoint0,I,J)*(uXXpp-uXXpm-uXXmp+uXXmm)/(hXIm+hXIp)/(hXJm+hXJp);
+	if (n == 1) {
+	  uXXmm = f1[numXXmm[number][I][J]];
+	  uXXmp = f1[numXXpm[number][J][I]];
+	  uXXpm = f1[numXXpm[number][I][J]];
+	  uXXpp = f1[numXXpp[number][I][J]];
+	} else if (n == -2) {
+	  uXXmm = g2[numXXmm[number][I][J]];
+	  uXXmp = g2[numXXpm[number][J][I]];
+	  uXXpm = g2[numXXpm[number][I][J]];
+	  uXXpp = g2[numXXpp[number][I][J]];
+	}
+	
+	uij -= 1./2*Dphiphi(FPoint0,I,J)*(uXXpp-uXXpm-uXXmp+uXXmm)
+	  /(hXIm+hXIp)/(hXJm+hXJp);
       }
 
       if (n == -2) {
-	uij -= Dphiphi(FPoint0,I,J)*(f1[Ind2No(indXIp)]-f1[Ind2No(indXIm)])
-	  *(f1[Ind2No(indXJp)]-f1[Ind2No(indXJm)])/(hXIm+hXIp)/(hXJm+hXJp);
+	uij -= Dphiphi(FPoint0,I,J)*(f1[numXp[number][I]]-f1[numXm[number][I]])
+	  *(f1[numXp[number][J]]-f1[numXm[number][J]])/(hXIm+hXIp)/(hXJm+hXJp);
       } // Cn
     }
   }
@@ -296,14 +293,14 @@ double JacobiPDE::PDE(int number, int n)
 
 void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
 {
-  double unext, u_norm;
+  double unext, u_norm, err;
   
   for (int step=0; step<maxstep; step++) {
     u_norm = 0;
     err = 0;
 
 #ifdef _OPENMP
-#pragma omp parallel reduction(+:u_norm)
+#pragma omp parallel reduction(+:u_norm, err)
 #endif
     {
 #ifdef _OPENMP
@@ -333,9 +330,11 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
     err = sqrt(err)/sqrt(u_norm);
 
     if (n == 1) {
-      cout << "\rerr for M1: " << setw(11) << left << err << "  step: " << step << flush;
+      cout << "\rerr for M1: " << setw(11) << left << err
+	   << "  step: " << step << flush;
     } else if (n == -2) {
-      cout << "\rerr for C2: " << setw(11) << left << err << "  step: " << step << flush;
+      cout << "\rerr for C2: " << setw(11) << left << err
+	   << "  step: " << step << flush;
     }
     
     if (err < tol) {
@@ -438,11 +437,6 @@ double JacobiPDE::return_f1(vector<int> &index)
 double JacobiPDE::return_g2(vector<int> &index)
 {
   return g2[Ind2No(index)];
-}
-
-double JacobiPDE::return_err()
-{
-  return err;
 }
 
 void JacobiPDE::export_fg(string filename)

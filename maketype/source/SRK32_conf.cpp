@@ -91,12 +91,15 @@ SRKintegrater::SRKintegrater(vector<double> &Xi, double T0)
   t0 = T0;
   xi = Xi;
 
-  for (int I=0; I<x.size(); I++) {
+  Idim = x.size();
+  noisedim = Idim;
+  
+  for (int I=0; I<Idim; I++) {
     aIs.push_back(x);
     vIs.push_back(x);
   }
-  for (int I=0; I<x.size(); I++) {
-    for (int alpha=0; alpha<x.size(); alpha++) {
+  for (int I=0; I<Idim; I++) {
+    for (int alpha=0; alpha<noisedim; alpha++) {
       aIs[I][alpha] = rand_normal(0,1);
     }
   }
@@ -117,13 +120,13 @@ SRKintegrater::SRKintegrater(vector<double> &Xi, double T0)
       B1[i][j] = 0;
     }
 
-    for (int alpha=0; alpha<x.size(); alpha++) {
+    for (int alpha=0; alpha<noisedim; alpha++) {
       bx[i].push_back(x);
       Hkx[i].push_back(x);
     }
   }
 
-  for (int alpha=0; alpha<x.size(); alpha++) {
+  for (int alpha=0; alpha<noisedim; alpha++) {
     dW.push_back(0);
   }
 
@@ -144,29 +147,29 @@ SRKintegrater::SRKintegrater(vector<double> &Xi, double T0)
 
 void SRKintegrater::SRK2(double dt)
 {
-  for (int alpha=0; alpha<dW.size(); alpha++) {
+  for (int alpha=0; alpha<noisedim; alpha++) {
     dW[alpha] = rand_normal(0.,1.)*sqrt(dt);
   }
 
   for (int i=0; i<3; i++) {
-    for (int I=0; I<x.size(); I++) {
+    for (int I=0; I<Idim; I++) {
       H0x[i][I] = x[I];
 
       for (int j=0; j<3; j++) {
 	H0x[i][I] += A0[i][j]*ax[j][I]*dt;
 
-	for (int alpha=0; alpha<dW.size(); alpha++) {
+	for (int alpha=0; alpha<noisedim; alpha++) {
 	  H0x[i][I] += B0[i][j]*bx[j][alpha][I]*dW[alpha];
 	}
       }
 
-      for (int beta=0; beta<dW.size(); beta++) {
+      for (int beta=0; beta<noisedim; beta++) {
 	Hkx[i][beta][I] = x[I];
 
 	for (int j=0; j<3; j++) {
 	  Hkx[i][beta][I] += A1[i][j]*ax[j][I]*dt;
 
-	  for (int alpha=0; alpha<dW.size(); alpha++) {
+	  for (int alpha=0; alpha<noisedim; alpha++) {
 	    Hkx[i][beta][I] += B1[i][j]*bx[j][alpha][I]*dW[alpha]*dW[beta]/2./sqrt(dt);
 
 	    if (alpha == beta) {
@@ -180,11 +183,11 @@ void SRKintegrater::SRK2(double dt)
     coeff(dt,i);
   }
 
-  for (int I=0; I<x.size(); I++) {
+  for (int I=0; I<Idim; I++) {
     for (int i=0; i<3; i++) {
       x[I] += Alpha[i]*ax[i][I]*dt;
 
-      for (int alpha=0; alpha<dW.size(); alpha++) {
+      for (int alpha=0; alpha<noisedim; alpha++) {
 	x[I] += (Beta1[i]*dW[alpha]+Beta2[i]*sqrt(dt))*bx[i][alpha][I];
       }
     }
@@ -198,17 +201,17 @@ void SRKintegrater::coeff(double dt, int step)
   double T = t + C0[step]*dt;
   vector<double> X = H0x[step];
 
-  for (int I=0; I<X.size(); I++) {
+  for (int I=0; I<Idim; I++) {
     ax[step][I] = Dphi(X,I);
   }
 
 
   T = t + C1[step]*dt;
 
-  for (int alpha=0; alpha<dW.size(); alpha++) {
+  for (int alpha=0; alpha<noisedim; alpha++) {
     X = Hkx[step][alpha];
 
-    for (int I=0; I<X.size(); I++) {
+    for (int I=0; I<Idim; I++) {
       bx[step][alpha][I] = PhiNoise(X,I,alpha);
     }
   }
@@ -241,14 +244,14 @@ double SRKintegrater::vielbein(vector<double> &X, int I, int alpha)
 double SRKintegrater::eIsigma(vector<double> &X, int I)
 {
   double NormN = 0;
-  for (int J=0; J<X.size(); J++) {
-    for (int K=0; K<X.size(); K++) {
+  for (int J=0; J<Idim; J++) {
+    for (int K=0; K<Idim; K++) {
       NormN += inversemetric(X,J,K)*VI(X,J)*VI(X,K);
     }
   }
 
   double eIsigma = 0;
-  for (int J=0; J<X.size(); J++) {
+  for (int J=0; J<Idim; J++) {
     eIsigma += inversemetric(X,I,J)*VI(X,J);
   }
 
@@ -262,20 +265,20 @@ double SRKintegrater::eIs(vector<double> &X, int I, int alpha)
   double Norm;
   for (int al=0; al<alpha; al++) {
     Norm = 0;
-    for (int J=0; J<X.size(); J++) {
-      for (int K=0; K<X.size(); K++) {
+    for (int J=0; J<Idim; J++) {
+      for (int K=0; K<Idim; K++) {
 	Norm += metric(X,J,K)*vielbein(X,J,al)*aIs[K][alpha];
       }
     }
 
-    for (int J=0; J<X.size(); J++) {
+    for (int J=0; J<Idim; J++) {
       vIs[J][alpha] -= Norm*vielbein(X,J,al);
     }
   }
 
   Norm = 0;
-  for (int J=0; J<X.size(); J++) {
-    for (int K=0; K<X.size(); K++) {
+  for (int J=0; J<Idim; J++) {
+    for (int K=0; K<Idim; K++) {
       Norm += metric(X,J,K)*vIs[J][alpha]*vIs[K][alpha];
     }
   }

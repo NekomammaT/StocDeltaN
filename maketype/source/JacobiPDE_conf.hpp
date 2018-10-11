@@ -23,8 +23,12 @@ protected:
   vector<double> FPoint; // argument: I
   vector<bool> Omega; // argument: number
   vector<int> ind; // argument: I
+  vector< vector<int> > numXp, numXm; // argument: number, der. dir. I
+  vector< vector< vector<int> > > numXXpp, numXXpm, numXXmm;
+  // argument: number, 1st der. dir. I, 2nd der. dir. J
+  vector< vector<double> > hp, hm; // argument: number, I
   vector<int> siteNo; // argument: I
-  double rhoc, err;
+  double rhoc;
   int dim, volume, pvol;
   
 public:

@@ -1,4 +1,5 @@
 #include "../source/StocDeltaN_conf.hpp"
+#include <sys/time.h>
 
 #define MODEL "hilltop_conf"
 
@@ -7,7 +8,7 @@
 #define HMIN (1e-8)
 #define HOV (1./20)
 
-#define MAXSTEP 10000000
+#define MAXSTEP 100000000
 #define TOL 1e-10
 
 #define LAMBDA 0.01
@@ -25,6 +26,13 @@
 
 int main(int argc, char** argv)
 {
+  struct timeval tv;
+  struct timezone tz;
+  double before, after;
+  
+  gettimeofday(&tv, &tz);
+  before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
+  
   double h, sitev = XMIN;
   vector<double> site;
   vector< vector<double> > sitepack;
@@ -45,6 +53,10 @@ int main(int argc, char** argv)
   //sdn.sample();
   
   sdn.solve();
+
+  gettimeofday(&tv, &tz);
+  after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  cout << after - before << " sec." << endl;
 }
 
 

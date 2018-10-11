@@ -16,6 +16,7 @@ protected:
     A0[3][3],A1[3][3],B0[3][3],B1[3][3],Alpha[3],Beta1[3],Beta2[3],C0[3],C1[3];
   vector<double> x,xi,dW,ax[3],H0x[3];
   vector< vector<double> > bx[3],Hkx[3],aIs,vIs;
+  int Idim, noisedim;
 
 public:
   SRKintegrater(){}

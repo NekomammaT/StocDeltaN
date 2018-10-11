@@ -3,7 +3,7 @@ SOURCE = ../source
 PHASECONF = conf
 
 CXX := g++-8
-CXXFLAGS := -std=c++11 -fopenmp -O2
+CXXFLAGS := -std=c++11 -O3 -fopenmp
 
 ifeq ($(PHASECONF),conf)
 $(MODEL): $(MODEL).o $(SOURCE)/StocDeltaN_conf.o $(SOURCE)/JacobiPDE_conf.o $(SOURCE)/SRK32_conf.o
