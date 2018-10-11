@@ -1,6 +1,7 @@
 #include "../source/StocDeltaN_conf.hpp"
+#include <sys/time.h>
 
-#define MODEL "sample_DC_conf" // model name
+#define MODEL "double_chaotic_conf" // model name
 
 // ---------- box size & step h ------------
 #define PHIMIN -5
@@ -39,6 +40,13 @@
 
 int main(int argc, char** argv)
 {
+  struct timeval tv;
+  struct timezone tz;
+  double before, after;
+  
+  gettimeofday(&tv, &tz);
+  before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
+  
   // ---------- set box step h ---------------
   double h = HPHI, sitev = PHIMIN;
   vector<double> site;
@@ -64,9 +72,13 @@ int main(int argc, char** argv)
   StocDeltaN sdn(MODEL,sitepack,RHOC,xi,0,MAXSTEP,TOL,RECURSION,
 		 TIMESTEP,NMAX,DELTAN); // declare the system
   
-  sdn.sample(); // show 1 sample path
+  //sdn.sample(); // show 1 sample path
   
-  //sdn.solve(); // solve PDE & SDE and obtain power spectrum
+  sdn.solve(); // solve PDE & SDE and obtain power spectrum
+
+  gettimeofday(&tv, &tz);
+  after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  cout << after - before << " sec." << endl;
 }
 
 
@@ -125,4 +137,3 @@ double StocDeltaN::PhiNoise(vector<double> &X, int I, int alpha) // g^I_a
 {
   return sqrt(V(X)/3.)/2./M_PI * vielbein(X,I,alpha);
 }
-
