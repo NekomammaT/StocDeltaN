@@ -552,6 +552,8 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
       break;
     }
   }
+
+  cout << endl;
 }
 
 int JacobiPDE::Ind2No(vector<int> index[])
