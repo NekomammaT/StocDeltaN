@@ -316,7 +316,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
 	    indPPpm[1][J]--;
 	    indPPmm[1][J]--;
 	  }
-	  if (ind0[1][J] = siteNo[1][J]-1) {
+	  if (ind0[1][J] == siteNo[1][J]-1) {
 	    indXPpp[1][J]--;
 	    indXPmp[1][J]--;
 	    indPPpp[1][J]--;

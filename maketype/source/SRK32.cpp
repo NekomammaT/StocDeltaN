@@ -36,20 +36,6 @@ double SRKintegrater::VI(vector<double> &X, int I)
   }
 }
 
-double SRKintegrater::VIJ(vector<double> &X, int I, int J)
-{
-  double m1 = 0.01;
-  double m2 = 0.1;
-
-  if (I == 0 && J == 0) {
-    return m1*m1;
-  } else if (I == 1 && J == 1) {
-    return m2*m2;
-  } else {
-    return 0;
-  }
-}
-
 double SRKintegrater::metric(vector<double> &X, int I, int J)
 {
   double MM = 1e-3;

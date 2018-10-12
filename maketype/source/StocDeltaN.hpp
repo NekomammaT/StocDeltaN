@@ -27,7 +27,6 @@ public:
   virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
-  virtual double VIJ(vector<double> &X, int I, int J);
   virtual double metric(vector<double> &X, int I, int J);
   virtual double inversemetric(vector<double> &X, int I, int J);
   virtual double affine(vector<double> &X, int I, int J, int K);
