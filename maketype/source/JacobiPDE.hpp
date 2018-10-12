@@ -23,14 +23,17 @@ protected:
   vector<double> FPoint[2]; // argument: x or p, I
   vector<bool> Omega; // argument: number
   vector<int> ind[2]; // argument: x or p, I
+  vector< vector<int> > numXp, numXm, numPp, numPm; // argument: number, I
+  vector< vector< vector<int> > > numXXpp, numXXpm, numXXmm,
+    numXPpp, numXPpm, numXPmp, numXPmm, numPPpp, numPPpm, numPPmm; // argument: number, I, J
+  vector< vector<double> > hp[2], hm[2]; // argument: x or p, number, I
   vector<int> siteNo[2]; // argument: x or p, I
-  double rhoc, err;
+  double rhoc;
   int dim, volume, pvol;
   
 public:
   JacobiPDE(){}
   JacobiPDE(vector< vector<double> > Site[], double Rhoc);
-  void init_fn();
   double PDE(int number, int n);
   void PDE_solve(int maxstep, double tol, int n);
   int Ind2No(vector<int> index[]);
@@ -43,7 +46,6 @@ public:
   double Interpolation_f(vector<double> &X, vector<double> &P, vector<double> &f);
   double return_f1(vector<int> index[]);
   double return_g2(vector<int> index[]);
-  double return_err();
   void export_fg(string filename);
   virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);

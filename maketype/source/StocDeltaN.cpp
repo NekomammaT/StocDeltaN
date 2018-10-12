@@ -51,10 +51,7 @@ void StocDeltaN::solve()
   cout << "total # of sites: " << volume << endl;
   
   PDE_solve(maxstep,tol,1); //solve f1
-  cout << "\rerr for f1: " << return_err() << endl;
-  
   PDE_solve(maxstep,tol,-2);
-  cout << "\rerr for g2: " << return_err() << endl;
   
   string str = "Mn_" + model + ".dat";
   

@@ -43,7 +43,6 @@ public:
   double Interpolation_f(vector<double> &X, vector<double> &f);
   double return_f1(vector<int> &index);
   double return_g2(vector<int> &index);
-  double return_err();
   void export_fg(string filename);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
