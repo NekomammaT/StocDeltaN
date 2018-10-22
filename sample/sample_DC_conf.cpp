@@ -1,4 +1,5 @@
-#include "../source/StocDeltaN_conf.hpp"
+
+0;95;0c#include "../source/StocDeltaN_conf.hpp"
 
 #define MODEL "sample_DC_conf" // model name
 
@@ -64,9 +65,9 @@ int main(int argc, char** argv)
   StocDeltaN sdn(MODEL,sitepack,RHOC,xi,0,MAXSTEP,TOL,RECURSION,
 		 TIMESTEP,NMAX,DELTAN); // declare the system
   
-  sdn.sample(); // show 1 sample path
+  //sdn.sample(); // show 1 sample path
   
-  //sdn.solve(); // solve PDE & SDE and obtain power spectrum
+  sdn.solve(); // solve PDE & SDE and obtain power spectrum
 }
 
 
