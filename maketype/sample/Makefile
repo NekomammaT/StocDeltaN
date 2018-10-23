@@ -1,6 +1,6 @@
-MODEL = chaotic_logp
+MODEL = double_chaotic_conf
 SOURCE = ../source
-PHASECONF = #conf
+PHASECONF = conf
 
 CXX := g++
 CXXFLAGS := -std=c++11 -O3 #-fopenmp
