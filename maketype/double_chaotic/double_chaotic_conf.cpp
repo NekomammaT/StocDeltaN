@@ -73,8 +73,12 @@ int main(int argc, char** argv)
 		 TIMESTEP,NMAX,DELTAN); // declare the system
   
   //sdn.sample(); // show 1 sample path
+  //sdn.sample_plot();
   
   sdn.solve(); // solve PDE & SDE and obtain power spectrum
+  sdn.f1_plot();
+  sdn.g2_plot();
+  sdn.calP_plot();
 
   gettimeofday(&tv, &tz);
   after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;

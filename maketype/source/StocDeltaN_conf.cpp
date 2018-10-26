@@ -1,4 +1,5 @@
 #include "StocDeltaN_conf.hpp"
+#include "matplotlibcpp.hpp"
 
 StocDeltaN::StocDeltaN(string Model,
 		       vector< vector<double> > &Site, double Rhoc,
@@ -62,6 +63,11 @@ void StocDeltaN::solve()
   double dt = timestep;
   int recNo = 0;
 
+  if (dim == 2) {
+    x1traj.clear();
+    x2traj.clear();
+  }
+  
   init_txp();
 
 #ifdef _OPENMP
@@ -81,6 +87,11 @@ void StocDeltaN::solve()
 	  trajfile << ssdn.return_phi(I) << ' ';
 	}
 	trajfile << ssdn.return_intf1() << ' ' << ssdn.return_intg2() << endl;
+
+	if (dim == 2) {
+	  x1traj.push_back(ssdn.return_phi(0));
+	  x2traj.push_back(ssdn.return_phi(1));
+	}
       }
       
       dN2data.push_back({ssdn.return_intf1(),ssdn.return_intg2()});
@@ -130,6 +141,8 @@ void StocDeltaN::solve()
 
     meandN2 /= recNo;
     calPfile << dN2List[0][list][0] << ' ' << meandN2 << ' ' << (meandN2-predN2)/deltaN << endl;
+    Ndata.push_back(dN2List[0][list][0]);
+    calPdata.push_back((meandN2-predN2)/deltaN);
     predN2 = meandN2;
   }
 }
@@ -163,6 +176,11 @@ void StocDeltaN::sample()
     }
     ofs << setprecision(17)
 	<< return_V() << endl;
+
+    if (dim == 2) {
+      x1traj.push_back(return_phi(0));
+      x2traj.push_back(return_phi(1));
+    }
   }
 
   cout << "[xi, xf, xmin, xmax]: " << endl;
@@ -174,6 +192,70 @@ void StocDeltaN::sample()
   cout << "N = " << return_t() << endl;
   cout << setprecision(17)
        << "Vi = " << Vi << ",  Vf = " <<return_V() << endl;
+}
+
+void StocDeltaN::sample_plot()
+{
+  if (dim == 2) {
+    string filename = "sample_" + model + ".pdf";
+    
+    matplotlibcpp g;
+    g.open();
+    g.xlabel(string("x1"));
+    g.ylabel(string("x2"));
+    g.plot(x1traj,x2traj,1,string("b"));
+    g.save(filename);
+    g.show();
+    g.close();
+  }
+}
+
+void StocDeltaN::f1_plot()
+{
+  if (dim == 2) {
+    string filename = "N_" + model + ".pdf";
+    
+    matplotlibcpp g;
+    g.open();
+    g.xlabel(string("x1"));
+    g.ylabel(string("x2"));
+    g.contourf(site[0],site[1],f1,string("<N>"));
+    g.plot(x1traj,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+    g.close();
+  }
+}
+
+void StocDeltaN::g2_plot()
+{
+  if (dim == 2) {
+    string filename = "dN2_" + model + ".pdf";
+
+    matplotlibcpp g;
+    g.open();
+    g.xlabel(string("x1"));
+    g.ylabel(string("x2"));
+    g.log_contourf(site[0],site[1],g2,string("log10<delta N^2>"));
+    g.plot(x1traj,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+    g.close();
+  }
+}
+
+void StocDeltaN::calP_plot()
+{
+  string filename = "calP_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+  g.xlabel(string("<N>"));
+  g.ylabel(string("calP_zeta"));
+  g.ylog();
+  g.plot(Ndata,calPdata,1,string("b"));
+  g.save(filename);
+  g.show();
+  g.close();
 }
 
 double StocDeltaN::return_intf1()

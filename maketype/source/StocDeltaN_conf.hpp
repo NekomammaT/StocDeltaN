@@ -10,6 +10,7 @@ protected:
   string model;
   double maxstep, tol, timestep, Nmax, deltaN;
   int recursion;
+  vector<double> Ntraj, x1traj, x2traj, Ndata, calPdata;
   
 public:
   StocDeltaN(){}
@@ -22,6 +23,10 @@ public:
   void init_txp();
   void solve();
   void sample();
+  void sample_plot();
+  void f1_plot();
+  void g2_plot();
+  void calP_plot();
   double return_intf1();
   double return_intg2();
   virtual double V(vector<double> &X);
