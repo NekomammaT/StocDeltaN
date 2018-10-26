@@ -44,7 +44,7 @@ void matplotlibcpp::plot(vector<double> X, vector<double> Y, double lw, string c
 {
   fprintf(p, "plt.plot([%f", X[0]);
   for (int i=1; i<X.size(); i++) {
-    fprintf(p, ",%f", X[i]);
+    fprintf(p, ",%e", X[i]);
   }
   fprintf(p, "],[%f", Y[0]);
   for (int i=1; i<Y.size(); i++) {

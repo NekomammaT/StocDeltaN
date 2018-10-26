@@ -177,7 +177,10 @@ void StocDeltaN::sample()
     ofs << setprecision(17)
 	<< return_V() << endl;
 
-    if (dim == 2) {
+    if (dim == 1) {
+      Ntraj.push_back(return_t());
+      x1traj.push_back(return_phi(0));
+    } else if (dim == 2) {
       x1traj.push_back(return_phi(0));
       x2traj.push_back(return_phi(1));
     }
@@ -196,52 +199,71 @@ void StocDeltaN::sample()
 
 void StocDeltaN::sample_plot()
 {
-  if (dim == 2) {
-    string filename = "sample_" + model + ".pdf";
-    
-    matplotlibcpp g;
-    g.open();
-    g.xlabel(string("x1"));
-    g.ylabel(string("x2"));
+  string filename = "sampel_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$N$"));
+    g.ylabel(string("$\\phi$"));
+    g.plot(Ntraj,x1traj,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    g.xlabel(string("$\\phi_1$"));
+    g.ylabel(string("$\\phi_2$"));
     g.plot(x1traj,x2traj,1,string("b"));
     g.save(filename);
     g.show();
-    g.close();
   }
+  g.close();
 }
 
 void StocDeltaN::f1_plot()
 {
-  if (dim == 2) {
-    string filename = "N_" + model + ".pdf";
-    
-    matplotlibcpp g;
-    g.open();
-    g.xlabel(string("x1"));
-    g.ylabel(string("x2"));
-    g.contourf(site[0],site[1],f1,string("<N>"));
+  string filename = "N_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<N>$"));
+    g.plot(site[0],f1,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    g.xlabel(string("$\\phi_1$"));
+    g.ylabel(string("$\\phi_2$"));
+    g.contourf(site[0],site[1],f1,string("$<N>$"));
     g.plot(x1traj,x2traj,3,string("r"));
     g.save(filename);
     g.show();
-    g.close();
   }
+  g.close();
 }
 
 void StocDeltaN::g2_plot()
 {
-  if (dim == 2) {
-    string filename = "dN2_" + model + ".pdf";
+  string filename = "dN2_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
 
-    matplotlibcpp g;
-    g.open();
-    g.xlabel(string("x1"));
-    g.ylabel(string("x2"));
-    g.log_contourf(site[0],site[1],g2,string("log10<delta N^2>"));
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<\\delta N^2>$"));
+    g.ylog();
+    g.plot(site[0],g2,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    g.xlabel(string("$\\phi_1$"));
+    g.ylabel(string("$\\phi_2$"));
+    g.log_contourf(site[0],site[1],g2,string("$\\mathrm{log}_{10}<\\delta N^2>$"));
     g.plot(x1traj,x2traj,3,string("r"));
     g.save(filename);
     g.show();
-    g.close();
   }
+  g.close();
 }
 
 void StocDeltaN::calP_plot()
@@ -249,8 +271,8 @@ void StocDeltaN::calP_plot()
   string filename = "calP_" + model + ".pdf";
   matplotlibcpp g;
   g.open();
-  g.xlabel(string("<N>"));
-  g.ylabel(string("calP_zeta"));
+  g.xlabel(string("$<N>$"));
+  g.ylabel(string("$\\mathcal{P}_\\zeta$"));
   g.ylog();
   g.plot(Ndata,calPdata,1,string("b"));
   g.save(filename);

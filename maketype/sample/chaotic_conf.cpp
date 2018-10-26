@@ -59,8 +59,12 @@ int main(int argc, char** argv)
 		 TIMESTEP,NMAX,DELTAN); // declare the system
   
   //sdn.sample(); // show 1 sample path
+  //sdn.sample_plot(); // plot that sample path
   
   sdn.solve(); // solve PDE & SDE and obtain power spectrum
+  sdn.f1_plot(); // show plot of <N>
+  sdn.g2_plot(); // show plot of <delta N^2>
+  sdn.calP_plot(); // show plot of power spectrum of zeta
 
   // --------- stop stopwatch ----------------
   gettimeofday(&tv, &tz);
