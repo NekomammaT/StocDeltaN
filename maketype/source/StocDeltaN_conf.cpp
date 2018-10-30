@@ -199,7 +199,7 @@ void StocDeltaN::sample()
 
 void StocDeltaN::sample_plot()
 {
-  string filename = "sampel_" + model + ".pdf";
+  string filename = "sample_" + model + ".pdf";
   matplotlibcpp g;
   g.open();
 
@@ -208,10 +208,85 @@ void StocDeltaN::sample_plot()
     g.ylabel(string("$\\phi$"));
     g.plot(Ntraj,x1traj,1,string("b"));
     g.save(filename);
+    g.save(filename);
     g.show();
   } else if (dim == 2) {
-    g.xlabel(string("$\\phi_1$"));
-    g.ylabel(string("$\\phi_2$"));
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.plot(x1traj,x2traj,1,string("b"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::sample_logplot()
+{
+  string filename = "sample_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    vector<double> x1abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    
+    g.xlabel(string("$N$"));
+    g.ylabel(string("$|\\phi|$"));
+    g.ylog();
+    g.plot(Ntraj,x1abs,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    vector<double> x2abs;
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.ylog();
+    g.plot(x1traj,x2abs,1,string("b"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::sample_loglinearplot()
+{
+  string filename = "sample_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x1abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.xlog();
+    g.plot(x1abs,x2traj,1,string("b"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::sample_loglogplot()
+{
+  string filename = "sample_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.xlog();
+    g.ylog();
     g.plot(x1traj,x2traj,1,string("b"));
     g.save(filename);
     g.show();
@@ -232,10 +307,90 @@ void StocDeltaN::f1_plot()
     g.save(filename);
     g.show();
   } else if (dim == 2) {
-    g.xlabel(string("$\\phi_1$"));
-    g.ylabel(string("$\\phi_2$"));
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$\\phi^2$"));
     g.contourf(site[0],site[1],f1,string("$<N>$"));
     g.plot(x1traj,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::f1_logplot()
+{
+  string filename = "N_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x2abs;
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.ylog();
+    g.contourf(site[0],site[1],f1,string("$<N>$"));
+    g.plot(x1traj,x2abs,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::f1_loglinearplot()
+{
+  string filename = "N_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<N>$"));
+    g.xlog();
+    g.plot(site[0],f1,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    vector<double> x1abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.xlog();
+    g.contourf(site[0],site[1],f1,string("$<N>$"));
+    g.plot(x1abs,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::f1_loglogplot()
+{
+  string filename = "N_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x1abs, x2abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.xlog();
+    g.ylog();
+    g.contourf(site[0],site[1],f1,string("$<N>$"));
+    g.plot(x1abs,x2abs,3,string("r"));
     g.save(filename);
     g.show();
   }
@@ -256,10 +411,91 @@ void StocDeltaN::g2_plot()
     g.save(filename);
     g.show();
   } else if (dim == 2) {
-    g.xlabel(string("$\\phi_1$"));
-    g.ylabel(string("$\\phi_2$"));
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$\\phi^2$"));
     g.log_contourf(site[0],site[1],g2,string("$\\mathrm{log}_{10}<\\delta N^2>$"));
     g.plot(x1traj,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g2_logplot()
+{
+  string filename = "dN2_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x2abs;
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.ylog();
+    g.log_contourf(site[0],site[1],g2,string("$\\mathrm{log}_{10}<\\delta N^2>$"));
+    g.plot(x1traj,x2abs,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g2_loglinearplot()
+{
+  string filename = "dN2_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<\\delta N^2>$"));
+    g.xlog();
+    g.ylog();
+    g.plot(site[0],g2,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    vector<double> x1abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.xlog();
+    g.log_contourf(site[0],site[1],g2,string("$\\mathrm{log}_{10}<\\delta N^2>$"));
+    g.plot(x1abs,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g2_loglogplot()
+{
+  string filename = "dN2_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x1abs, x2abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.xlog();
+    g.ylog();
+    g.log_contourf(site[0],site[1],g2,string("$\\mathrm{log}_{10}<\\delta N^2>$"));
+    g.plot(x1abs,x2abs,3,string("r"));
     g.save(filename);
     g.show();
   }

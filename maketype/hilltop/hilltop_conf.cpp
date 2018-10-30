@@ -51,8 +51,12 @@ int main(int argc, char** argv)
 		 TIMESTEP,NMAX,DELTAN);
   
   //sdn.sample();
+  //sdn.sample_logplot();
   
   sdn.solve();
+  sdn.f1_loglinearplot();
+  sdn.g2_loglinearplot();
+  sdn.calP_plot();
 
   gettimeofday(&tv, &tz);
   after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;

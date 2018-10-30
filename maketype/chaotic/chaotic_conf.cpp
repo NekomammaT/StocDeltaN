@@ -48,8 +48,12 @@ int main(int argc, char** argv)
 		 TIMESTEP,NMAX,DELTAN);
   
   //sdn.sample();
+  //sdn.sample_plot();
   
   sdn.solve();
+  sdn.f1_plot();
+  sdn.g2_plot();
+  sdn.calP_plot();
 
   gettimeofday(&tv, &tz);
   after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;

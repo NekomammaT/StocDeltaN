@@ -24,8 +24,17 @@ public:
   void solve();
   void sample();
   void sample_plot();
+  void sample_logplot();
+  void sample_loglinearplot();
+  void sample_loglogplot();
   void f1_plot();
+  void f1_logplot();
+  void f1_loglinearplot();
+  void f1_loglogplot();
   void g2_plot();
+  void g2_logplot();
+  void g2_loglinearplot();
+  void g2_loglogplot();
   void calP_plot();
   double return_intf1();
   double return_intg2();
