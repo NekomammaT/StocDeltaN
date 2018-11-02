@@ -194,7 +194,8 @@ void StocDeltaN::sample()
 
   cout << "N = " << return_t() << endl;
   cout << setprecision(17)
-       << "Vi = " << Vi << ",  Vf = " <<return_V() << endl;
+       << "Vi = " << Vi << ",  Vf = " << return_V()
+       << setprecision(6) << endl;
 }
 
 void StocDeltaN::sample_plot()
