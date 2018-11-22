@@ -57,7 +57,7 @@ void StocDeltaN::solve()
   export_fg(str); // export f1 and g2 to file
   
   
-  vector< vector<double> > dN2List[recursion];
+  vector< vector< vector<double> > > dN2List(recursion);
   str = "traj_" + model + ".dat";
   ofstream trajfile(str);
   double dt = timestep;
