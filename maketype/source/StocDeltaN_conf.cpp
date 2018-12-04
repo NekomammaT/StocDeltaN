@@ -209,7 +209,6 @@ void StocDeltaN::sample_plot()
     g.ylabel(string("$\\phi$"));
     g.plot(Ntraj,x1traj,1,string("b"));
     g.save(filename);
-    g.save(filename);
     g.show();
   } else if (dim == 2) {
     g.xlabel(string("$\\phi^1$"));
