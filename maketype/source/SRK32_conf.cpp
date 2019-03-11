@@ -68,6 +68,10 @@ double SRKintegrater::Dphi(vector<double> &X, int I)
 
   for (int J=0; J<X.size(); J++) {
     Dphi -= inversemetric(X,I,J)*VI(X,J)/V(X);
+
+    for (int K=0; K<X.size(); K++) {
+      Dphi -= affine(X,I,J,K)*Dphiphi(X,J,K)/2.;
+    }
   }
 
   return Dphi;
@@ -76,6 +80,17 @@ double SRKintegrater::Dphi(vector<double> &X, int I)
 double SRKintegrater::PhiNoise(vector<double> &X, int I, int alpha)
 {
   return sqrt(V(X)/3.)/2./M_PI * vielbein(X,I,alpha);
+}
+
+double SRKintegrater::Dphiphi(vector<double> &X, int I, int J)
+{
+  double Dphiphi = 0;
+
+  for (int alpha=0; alpha<noisedim; alpha++) {
+    Dphiphi += PhiNoise(X,I,alpha)*PhiNoise(X,J,alpha);
+  }
+
+  return Dphiphi;
 }
 
 // --------------------------------------------------------

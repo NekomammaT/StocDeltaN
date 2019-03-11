@@ -67,6 +67,10 @@ double JacobiPDE::Dphi(vector<double> &X, int I)
 
   for (int J=0; J<dim; J++) {
     Dphi -= inversemetric(X,I,J)*VI(X,J)/V(X);
+
+    for (int K=0; K<dim; K++) {
+      Dphi -= affine(X,I,J,K)*Dphiphi(X,J,K)/2.;
+    }
   }
 
   return Dphi;

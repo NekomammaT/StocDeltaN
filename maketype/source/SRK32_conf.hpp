@@ -36,6 +36,7 @@ public:
   virtual double affine(vector<double> &X, int I, int J, int K);
   virtual double Dphi(vector<double> &X, int I);
   virtual double PhiNoise(vector<double> &X, int I, int alpha);
+  virtual double Dphiphi(vector<double> &X, int I, int J);
 };
 
 double Uniform();
