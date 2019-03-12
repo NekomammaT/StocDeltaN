@@ -4,12 +4,12 @@
 #define MODEL "orbital_conf" // model name
 
 // ---------- box size & step h ------------
-#define PHIMIN -5
-#define PHIMAX 20
-#define PSIMIN 0
-#define PSIMAX 20
-#define HPHI (1e-1)
-#define HPSI (1e-1)
+#define RHOMIN 0.01
+#define RHOMAX 4
+#define THETAMIN 0
+#define THETAMAX 15
+#define HRHO (1e-2)
+#define HTHETA (1e-1)
 // -----------------------------------------
 
 // ---------- for PDE ----------------------
@@ -18,22 +18,21 @@
 // -----------------------------------------
 
 // ---------- potential parameter ----------
-#define MPHI (1e-5) 
-#define MPSI (MPHI/9.)
+#define MM (1e-5) 
 // -----------------------------------------
 
-#define RHOC (MPSI*MPSI) // end of inflation
+#define RHOC (MM*MM) // end of inflation
 
 // ---------- for SDE ----------------------
 #define RECURSION 100 // recursion for power spectrum
-#define PHIIN 13 // i.c. for phi
-#define PSIIN 13 // i.c. for psi
+#define RHOIN 2 // i.c. for phi
+#define THETAIN 10 // i.c. for psi
 #define TIMESTEP (1e-2) // time step: delta N
 // -----------------------------------------
 
 // ---------- for power spectrum -----------
 #define DELTAN 0.1 // calc. PS every DELTAN e-folds
-#define NMAX 80 // calc. PS for 0--NMAX e-folds
+#define NMAX 60 // calc. PS for 0--NMAX e-folds
 // -----------------------------------------
 
 
@@ -48,18 +47,18 @@ int main(int argc, char** argv)
   before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
   
   // ---------- set box step h ---------------
-  double h = HPHI, sitev = PHIMIN;
+  double h = HRHO, sitev = RHOMIN;
   vector<double> site;
   vector< vector<double> > sitepack;
-  while (sitev <= PHIMAX) {
+  while (sitev <= RHOMAX) {
     site.push_back(sitev);
     sitev += h;
   }
   sitepack.push_back(site);
   site.clear();
 
-  h = HPSI, sitev = PSIMIN;
-  while (sitev <= PSIMAX) {
+  h = HTHETA, sitev = THETAMIN;
+  while (sitev <= THETAMAX) {
     site.push_back(sitev);
     sitev += h;
   }
@@ -67,7 +66,7 @@ int main(int argc, char** argv)
   site.clear();
   // -----------------------------------------
   
-  vector<double> xi = {PHIIN,PSIIN}; // set i.c. for sample paths
+  vector<double> xi = {RHOIN,THETAIN}; // set i.c. for sample paths
   
   StocDeltaN sdn(MODEL,sitepack,RHOC,xi,0,MAXSTEP,TOL,RECURSION,
 		 TIMESTEP,NMAX,DELTAN); // declare the system
@@ -86,26 +85,28 @@ int main(int argc, char** argv)
 }
 
 
-// ---------- Lagrangian params. and diff. coeff.  X[0]=phi, X[1]=psi ----------
+// ---------- Lagrangian params. and diff. coeff.  X[0]=rho, X[1]=theta ----------
 
 double StocDeltaN::V(vector<double> &X)
 {
-  return 1./2*MPHI*MPHI*X[0]*X[0] + 1./2*MPSI*MPSI*X[1]*X[1];
+  return 1./2*MM*MM*(X[1]*X[1]-2./3/X[0]/X[0]);
 }
 
 double StocDeltaN::VI(vector<double> &X, int I) // \partial_I V
 {
   if (I == 0) {
-    return MPHI*MPHI*X[0];
+    return 2*MM*MM/3./X[0]/X[0];
   } else {
-    return MPSI*MPSI*X[1];
+    return MM*MM*X[1];
   }
 }
 
 double StocDeltaN::metric(vector<double> &X, int I, int J) // G_IJ
 {
-  if (I == J) {
+  if (I == 0 && J == 0) {
     return 1;
+  } else if (I == 1 && J == 1) {
+    return X[0]*X[0];
   } else {
     return 0;
   }
@@ -113,12 +114,24 @@ double StocDeltaN::metric(vector<double> &X, int I, int J) // G_IJ
 
 double StocDeltaN::inversemetric(vector<double> &X, int I, int J) // G^IJ
 {
-  return metric(X,I,J);
+  if (I == 0 && J == 0) {
+    return 1;
+  } else if (I == 1 && J == 1) {
+    return 1./X[0]/X[0];
+  } else {
+    return 0;
+  }
 }
 
 double StocDeltaN::affine(vector<double> &X, int I, int J, int K) // \Gamma^I_JK
 {
-  return 0;
+  if (I == 0 && J == 1 && K == 1) {
+    return -X[0];
+  } else if (I == 1 && J != K) {
+    return 1./X[0];
+  } else {
+    return 0;
+  }
 }
 
 double StocDeltaN::Dphi(vector<double> &X, int I) // D^I
