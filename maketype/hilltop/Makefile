@@ -1,6 +1,6 @@
-MODEL = hilltop_conf
+MODEL = hilltop
 SOURCE = ../source
-PHASECONF = conf
+PHASECONF = phase
 
 CXX := g++-8
 CXXFLAGS := -std=c++11 -O3 -fopenmp
