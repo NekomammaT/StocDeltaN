@@ -283,11 +283,17 @@ void StocDeltaN::sample_loglogplot()
   g.open();
 
   if (dim == 2) {
-    g.xlabel(string("$\\phi^1$"));
-    g.ylabel(string("$\\phi^2$"));
+    vector<double> x1abs, x2abs;
+    for (int i=0; i<x1traj.size(); i++) {
+      x1abs.push_back(fabs(x1traj[i]));
+      x2abs.push_back(fabs(x2traj[i]));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$|\\phi^2|$"));
     g.xlog();
     g.ylog();
-    g.plot(x1traj,x2traj,1,string("b"));
+    g.plot(x1abs,x2abs,1,string("b"));
     g.save(filename);
     g.show();
   }

@@ -1,6 +1,6 @@
-MODEL = chaotic_conf
+MODEL = chaotic
 SOURCE = ../source
-PHASECONF = conf
+PHASECONF = phase
 
 CXX := g++-8
 CXXFLAGS := -std=c++11 -O3 -fopenmp

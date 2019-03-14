@@ -74,12 +74,32 @@ double JacobiPDE::affine(vector<double> &X, int I, int J, int K)
   }
 }
 
+double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L) {
+  double MM = 1e-3;
+
+  if (L == 1) {
+    if (I == 0 && ((J == 0 && K == 1) || (J == 1 && K == 0))) {
+      return 2*(MM*MM-2*X[1]*X[1]) / (MM*MM+2*X[1]*X[1]) / (MM*MM+2*X[1]*X[1]);
+    } else if (I == 1 && J == 0 && K == 0) {
+      return -2./MM/MM;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
+
 double JacobiPDE::Dphi(vector<double> &X, vector<double> &P, int I)
 {
   double Dphi = 0;
 
   for (int J=0; J<dim; J++) {
     Dphi += inversemetric(X,I,J)*P[J]/H(X,P);
+
+    for (int K=0; K<dim; K++) {
+      Dphi -= 1./2*affine(X,I,J,K)*Dphiphi(X,P,J,K);
+    }
   }
 
   return Dphi;
@@ -92,8 +112,16 @@ double JacobiPDE::Dpi(vector<double> &X, vector<double> &P, int I)
 
   for (int J=0; J<dim; J++) {
     for (int K=0; K<dim; K++) {
-      for (int L=0; L<dim; L++) {
-	Dpi += affine(X,K,I,J)*inversemetric(X,J,L)*P[K]*P[L]/Hubble;
+      Dpi += affine(X,J,I,K)*Dphipi(X,P,K,J);
+      
+      for (int S=0; S<dim; S++) {
+	Dpi += affine(X,S,I,J)*inversemetric(X,J,K)*P[K]*P[S]/Hubble
+	  +1./2*derGamma(X,S,I,J,K)*P[S]*Dphiphi(X,P,J,K);
+
+	for (int R=0; R<dim; R++) {
+	  Dpi -= 1./2*(affine(X,R,J,K)*affine(X,S,I,R) + affine(X,R,I,J)*affine(X,S,K,R))
+	    *P[S]*Dphiphi(X,P,J,K);
+	}
       }
     }
   }

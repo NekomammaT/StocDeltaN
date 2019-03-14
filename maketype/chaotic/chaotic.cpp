@@ -3,13 +3,13 @@
 
 #define MODEL "chaotic"
 
-#define XMIN 0
-#define XMAX 15
-#define PMIN -16
-#define PMAX -10
+#define XMIN -15
+#define XMAX 0
+#define PMIN -12
+#define PMAX -11
 #define HX 0.1
 #define HP 0.1
-#define MAXSTEP 10000
+#define MAXSTEP 100000
 #define TOL (1e-10)
 
 #define MPHI (1e-5) //0.05
@@ -18,8 +18,8 @@
 
 #define NOISEDIM 1
 #define RECURSION 100
-#define PHIIN 13
-#define PIN -15
+#define PHIIN -13
+#define PIN -11.8
 #define TIMESTEP (1e-2)
 
 #define DELTAN 0.1
@@ -63,6 +63,7 @@ int main(int argc, char** argv)
 		 TIMESTEP,NMAX,DELTAN);
 
   //sdn.sample();
+  //sdn.sample_plot();
 
   sdn.solve();
 
@@ -116,6 +117,11 @@ double StocDeltaN::affine(vector<double> &X, int I, int J, int K)
   return 0;
 }
 
+double StocDeltaN::derGamma(vector<double> &X, int I, int J, int K, int L)
+{
+  return 0;
+}
+
 double StocDeltaN::PhiNoise(vector<double> &X, vector<double> &P, int I, int alpha)
 {
   return H(X,P)/2./M_PI * vielbein(X,P,I,alpha);
@@ -139,7 +145,11 @@ double StocDeltaN::Dphi(vector<double> &X, vector<double> &P, int I)
   double Dphi = 0;
 
   for (int J=0; J<dim; J++) {
-    Dphi -= inversemetric(X,I,J)*exp(P[J])/H(X,P);
+    Dphi += inversemetric(X,I,J)*exp(P[J])/H(X,P);
+
+    for (int K=0; K<dim; K++) {
+      Dphi -= 1./2*affine(X,I,J,K)*Dphiphi(X,P,J,K);
+    }
   }
 
   return Dphi;
@@ -148,12 +158,20 @@ double StocDeltaN::Dphi(vector<double> &X, vector<double> &P, int I)
 double StocDeltaN::Dpi(vector<double> &X, vector<double> &P, int I)
 {
   double Hubble = H(X,P);
-  double Dpi = -3+VI(X,I)*exp(-P[I])/Hubble;
+  double Dpi = -3-VI(X,I)*exp(-P[I])/Hubble;
 
   for (int J=0; J<dim; J++) {
     for (int K=0; K<dim; K++) {
-      for (int L=0; L<dim; L++) {
-	Dpi -= affine(X,K,I,J)*inversemetric(X,J,L)*exp(P[K]+P[L]-P[I])/Hubble;
+      Dpi += affine(X,J,I,K)*Dphipi(X,P,K,J);
+
+      for (int S=0; S<dim; S++) {
+	Dpi += affine(X,S,I,J)*inversemetric(X,J,K)*exp(P[K]+P[S]-P[I])/Hubble
+	  +1./2*derGamma(X,S,I,J,K)*exp(P[S]-P[I])*Dphiphi(X,P,J,K);
+
+	for (int R=0; R<dim; R++) {
+	  Dpi -= 1./2*(affine(X,R,J,K)*affine(X,S,I,R) + affine(X,R,I,J)*affine(X,S,K,R))
+	    *exp(P[S]-P[I])*Dphiphi(X,P,J,K);
+	}
       }
     }
   }

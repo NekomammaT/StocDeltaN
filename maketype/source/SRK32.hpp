@@ -37,8 +37,12 @@ public:
   virtual double metric(vector<double> &X, int I, int J);
   virtual double inversemetric(vector<double> &X, int I, int J);
   virtual double affine(vector<double> &X, int I, int J, int K);
+  virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
   virtual double Dphi(vector<double> &X, vector<double> &P, int I);
   virtual double Dpi(vector<double> &X, vector<double> &P, int I);
+  virtual double Dphiphi(vector<double> &X, vector<double> &P, int I, int J);
+  virtual double Dphipi(vector<double> &X, vector<double> &P, int I, int J);
+  virtual double Dpipi(vector<double> &X, vector<double> &P, int I, int J);
   virtual double PhiNoise(vector<double> &X, vector<double> &P, int I, int alpha);
   virtual double PiNoise(vector<double> &X, vector<double> &P, int I, int alpha);
 };

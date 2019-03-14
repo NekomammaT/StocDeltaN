@@ -75,12 +75,32 @@ double SRKintegrater::affine(vector<double> &X, int I, int J, int K)
   }
 }
 
+double SRKintegrater::derGamma(vector<double> &X, int I, int J, int K, int L) {
+  double MM = 1e-3;
+
+  if (L == 1) {
+    if (I == 0 && ((J == 0 && K == 1) || (J == 1 && K == 0))) {
+      return 2*(MM*MM-2*X[1]*X[1]) / (MM*MM+2*X[1]*X[1]) / (MM*MM+2*X[1]*X[1]);
+    } else if (I == 1 && J == 0 && K == 0) {
+      return -2./MM/MM;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
+
 double SRKintegrater::Dphi(vector<double> &X, vector<double> &P, int I)
 {
   double Dphi = 0;
 
   for (int J=0; J<X.size(); J++) {
     Dphi += inversemetric(X,I,J)*P[J]/H(X,P);
+
+    for (int K=0; K<X.size(); K++) {
+      Dphi -= 1./2*affine(X,I,J,K)*Dphiphi(X,P,J,K);
+    }
   }
 
   return Dphi;
@@ -93,13 +113,54 @@ double SRKintegrater::Dpi(vector<double> &X, vector<double> &P, int I)
 
   for (int J=0; J<X.size(); J++) {
     for (int K=0; K<X.size(); K++) {
-      for (int L=0; L<X.size(); L++) {
-	Dpi += affine(X,K,I,J)*inversemetric(X,J,L)*P[K]*P[L]/Hubble;
+      Dpi += affine(X,J,I,K)*Dphipi(X,P,K,J);
+      
+      for (int S=0; S<X.size(); S++) {
+	Dpi += affine(X,S,I,J)*inversemetric(X,J,K)*P[K]*P[S]/Hubble
+	  +1./2*derGamma(X,S,I,J,K)*P[S]*Dphiphi(X,P,J,K);
+
+	for (int R=0; R<X.size(); R++) {
+	  Dpi -= 1./2*(affine(X,R,J,K)*affine(X,S,I,R) + affine(X,R,I,J)*affine(X,S,K,R))
+	    *P[S]*Dphiphi(X,P,J,K);
+	}
       }
     }
   }
 
   return Dpi;
+}
+
+double SRKintegrater::Dphiphi(vector<double> &X, vector<double> &P, int I, int J)
+{
+  double Dphiphi = 0;
+
+  for (int alpha=0; alpha<dW.size(); alpha++) {
+    Dphiphi += PhiNoise(X,P,I,alpha)*PhiNoise(X,P,J,alpha);
+  }
+
+  return Dphiphi;
+}
+
+double SRKintegrater::Dphipi(vector<double> &X, vector<double> &P, int I, int J)
+{
+  double Dphipi = 0;
+
+  for (int alpha=0; alpha<dW.size(); alpha++) {
+    Dphipi += PhiNoise(X,P,I,alpha)*PiNoise(X,P,J,alpha);
+  }
+
+  return Dphipi;
+}
+
+double SRKintegrater::Dpipi(vector<double> &X, vector<double> &P, int I, int J)
+{
+  double Dpipi = 0;
+
+  for (int alpha=0; alpha<dW.size(); alpha++) {
+    Dpipi += PiNoise(X,P,I,alpha)*PiNoise(X,P,J,alpha);
+  }
+
+  return Dpipi;
 }
 
 double SRKintegrater::PhiNoise(vector<double> &X, vector<double> &P, int I, int alpha)
@@ -113,7 +174,7 @@ double SRKintegrater::PiNoise(vector<double> &X, vector<double> &P, int I, int a
 
   for (int J=0; J<X.size(); J++) {
     for (int K=0; K<X.size(); K++) {
-      PiNoise += affine(X,K,I,J)*P[K]*vielbein(X,P,I,alpha) * H(X,P)/2./M_PI;
+      PiNoise += affine(X,K,I,J)*P[K]*PhiNoise(X,P,J,alpha);
     }
   }
 
@@ -142,7 +203,7 @@ SRKintegrater::SRKintegrater(vector<double> &Xi, vector<double> &Pi, double T0,
     vIs.push_back(x);
   }
   for (int I=0; I<x.size(); I++) {
-    for (int alpha=0; alpha<x.size(); alpha++) {
+    for (int alpha=0; alpha<NoiseDim; alpha++) {
       aIs[I][alpha] = rand_normal(0,1);
     }
   }

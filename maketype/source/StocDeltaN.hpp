@@ -10,6 +10,7 @@ protected:
   string model;
   double maxstep, tol, timestep, Nmax, deltaN;
   int recursion;
+  vector<double> x1traj, p1traj, x2traj, Ndata, calPdata;
   
 public:
   StocDeltaN(){}
@@ -22,6 +23,11 @@ public:
   void init_txp();
   void solve();
   void sample();
+  void sample_plot();
+  void sample_logplot();
+  void sample_loglinearplot();
+  void sample_loglogplot();
+  void calP_plot();
   double return_intf1();
   double return_intg2();
   virtual double H(vector<double> &X, vector<double> &P);
@@ -30,6 +36,7 @@ public:
   virtual double metric(vector<double> &X, int I, int J);
   virtual double inversemetric(vector<double> &X, int I, int J);
   virtual double affine(vector<double> &X, int I, int J, int K);
+  virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
   virtual double PhiNoise(vector<double> &X, vector<double> &P, int I, int alpha);
   virtual double PiNoise(vector<double> &X, vector<double> &P, int I, int alpha);
   virtual double Dphi(vector<double> &X, vector<double> &P, int I);
