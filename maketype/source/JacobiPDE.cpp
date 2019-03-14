@@ -216,7 +216,8 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
       FPoint[0][I] = No2X(number,I);
       FPoint[1][I] = No2P(number,I);
     }
-    
+
+    /*
     if (V(FPoint[0]) < rhoc) {
       Omega[number] = false;
       f1[number] = 0;
@@ -225,6 +226,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
       f1[number] = rand()%10;
       g2[number] = (rand()%10)/10.;
     }
+    */
   }
   
   // ---------------- reflecting b.c. ----------------

@@ -25,7 +25,7 @@ void StocDeltaN::init_fn()
       FPoint[1][I] = No2P(number,I);
     }
     
-    if (V(FPoint[0]) < rhoc) {
+    if (3*H(FPoint[0],FPoint[1])*H(FPoint[0],FPoint[1]) < rhoc) {
       Omega[number] = false;
       f1[number] = 0;
       g2[number] = 0;
@@ -57,7 +57,6 @@ void StocDeltaN::solve()
   string str = "Mn_" + model + ".dat";
   
   export_fg(str); // export f1 and g2 to file
-  
   
   vector< vector<double> > dN2List[recursion];
   str = "traj_" + model + ".dat";
