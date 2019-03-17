@@ -3,12 +3,14 @@
 
 #define MODEL "chaotic"
 
-#define XMIN -15
-#define XMAX 0
-#define PMIN -12
-#define PMAX -11
-#define HX 0.1
-#define HP 0.1
+#define XMIN 0
+#define XMAX 15
+#define PMIN -1e-4
+#define PMAX 0
+#define HX (0.01)
+#define HPMIN (1e-6)
+#define HPOV (1./20)
+
 #define MAXSTEP 100000
 #define TOL (1e-10)
 
@@ -18,8 +20,8 @@
 
 #define NOISEDIM 1
 #define RECURSION 100
-#define PHIIN -13
-#define PIN -11.8
+#define PHIIN 13
+#define PIN -(5e-6)
 #define TIMESTEP (1e-2)
 
 #define DELTAN 0.1
@@ -47,8 +49,9 @@ int main(int argc, char** argv)
   site.clear();
 
   sitev = PMIN;
-  h = HP;
   while (sitev <= PMAX) {
+    h = max(fabs(sitev)*HPOV,HPMIN);
+    
     site.push_back(sitev);
     sitev += h;
   }
@@ -58,12 +61,11 @@ int main(int argc, char** argv)
   vector<double> xi = {PHIIN};
   vector<double> pi = {PIN};
   
-  
   StocDeltaN sdn(MODEL,sitepack,RHOC,xi,pi,0,NOISEDIM,MAXSTEP,TOL,RECURSION,
 		 TIMESTEP,NMAX,DELTAN);
 
   //sdn.sample();
-  //sdn.sample_plot();
+  //sdn.sample_logplot();
 
   sdn.solve();
 
@@ -85,7 +87,7 @@ double StocDeltaN::H(vector<double> &X, vector<double> &P)
 
   for (int I=0; I<X.size(); I++) {
     for (int J=0; J<X.size(); J++) {
-      rho += 1./2*inversemetric(X,I,J)*exp(P[I]+P[J]);
+      rho += 1./2*inversemetric(X,I,J)*P[I]*P[J];
     }
   }
 
@@ -133,7 +135,7 @@ double StocDeltaN::PiNoise(vector<double> &X, vector<double> &P, int I, int alph
 
   for (int J=0; J<dim; J++) {
     for (int K=0; K<dim; K++) {
-      PiNoise += affine(X,K,I,J)*exp(P[K]-P[I])*PhiNoise(X,P,J,alpha);
+      PiNoise += affine(X,K,I,J)*P[K]*PhiNoise(X,P,J,alpha);
     }
   }
 
@@ -145,7 +147,7 @@ double StocDeltaN::Dphi(vector<double> &X, vector<double> &P, int I)
   double Dphi = 0;
 
   for (int J=0; J<dim; J++) {
-    Dphi += inversemetric(X,I,J)*exp(P[J])/H(X,P);
+    Dphi += inversemetric(X,I,J)*P[J]/H(X,P);
 
     for (int K=0; K<dim; K++) {
       Dphi -= 1./2*affine(X,I,J,K)*Dphiphi(X,P,J,K);
@@ -158,19 +160,19 @@ double StocDeltaN::Dphi(vector<double> &X, vector<double> &P, int I)
 double StocDeltaN::Dpi(vector<double> &X, vector<double> &P, int I)
 {
   double Hubble = H(X,P);
-  double Dpi = -3-VI(X,I)*exp(-P[I])/Hubble;
+  double Dpi = -3*P[I]-VI(X,I)/Hubble;
 
   for (int J=0; J<dim; J++) {
     for (int K=0; K<dim; K++) {
       Dpi += affine(X,J,I,K)*Dphipi(X,P,K,J);
 
       for (int S=0; S<dim; S++) {
-	Dpi += affine(X,S,I,J)*inversemetric(X,J,K)*exp(P[K]+P[S]-P[I])/Hubble
-	  +1./2*derGamma(X,S,I,J,K)*exp(P[S]-P[I])*Dphiphi(X,P,J,K);
+	Dpi += affine(X,S,I,J)*inversemetric(X,J,K)*P[K]*P[S]/Hubble
+	  +1./2*derGamma(X,S,I,J,K)*P[S]*Dphiphi(X,P,J,K);
 
 	for (int R=0; R<dim; R++) {
 	  Dpi -= 1./2*(affine(X,R,J,K)*affine(X,S,I,R) + affine(X,R,I,J)*affine(X,S,K,R))
-	    *exp(P[S]-P[I])*Dphiphi(X,P,J,K);
+	    *P[S]*Dphiphi(X,P,J,K);
 	}
       }
     }
@@ -188,10 +190,8 @@ double StocDeltaN::Dphipi(vector<double> &X, vector<double> &P, int I, int J)
 {
   double Dphipi = 0;
 
-  for (int K=0; K<dim; K++) {
-    for (int L=0; L<dim; L++) {
-      Dphipi += affine(X,K,J,L)*exp(P[K]-P[J])*Dphiphi(X,P,I,L);
-    }
+  for (int alpha=0; alpha<dW.size(); alpha++) {
+    Dphipi += PhiNoise(X,P,I,alpha)*PiNoise(X,P,J,alpha);
   }
 
   return Dphipi;
@@ -201,14 +201,8 @@ double StocDeltaN::Dpipi(vector<double> &X, vector<double> &P, int I, int J)
 {
   double Dpipi = 0;
 
-  for (int K=0; K<dim; K++) {
-    for (int L=0; L<dim; L++) {
-      for (int M=0; M<dim; M++) {
-	for (int N=0; N<dim; N++) {
-	  Dpipi += affine(X,K,I,L)*affine(X,M,J,N)*exp(P[K]+P[M]-P[I]-P[J])*Dphiphi(X,P,L,N);
-	}
-      }
-    }
+  for (int alpha=0; alpha<dW.size(); alpha++) {
+    Dpipi += PiNoise(X,P,I,alpha)*PiNoise(X,P,J,alpha);
   }
 
   return Dpipi;

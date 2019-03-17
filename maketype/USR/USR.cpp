@@ -7,12 +7,12 @@
 #define XMAX 0.2
 #define PMIN -(2e-6)
 #define PMAX 0
-#define HXMIN (1e-6)
+#define HXMIN (1e-7)
 #define HXOV (1./20)
 #define HPMIN (1e-11)
 #define HPOV (1./20)
 
-#define MAXSTEP 10000
+#define MAXSTEP 100000
 #define TOL 1e-10
 
 #define V0 (1e-10)

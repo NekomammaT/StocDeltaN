@@ -188,7 +188,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
   ind[1] = vector<int>(dim,0);
   FPoint[0] = vector<double>(dim,0);
   FPoint[1] = vector<double>(dim,0);
-
+  
   for (int xp=0; xp<2; xp++) {
     for (int I=0; I<dim; I++) {
       siteNo[xp][I] = site[xp][I].size();
@@ -198,7 +198,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > Site[], double Rhoc)
       }
     }
   }
-
+  
   volume = 1, pvol = 1;
   for (int I=0; I<dim; I++) {
     volume *= siteNo[0][I]*siteNo[1][I];
@@ -536,7 +536,7 @@ double JacobiPDE::PDE(int number, int n)
 
 void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
 {
-  double unext, u_norm, err;
+  double u_norm, err;
   
   for (int step=0; step<maxstep; step++) {
     u_norm = 0;
