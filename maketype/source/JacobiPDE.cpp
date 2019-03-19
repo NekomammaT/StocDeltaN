@@ -444,7 +444,7 @@ double JacobiPDE::PDE(int number, int n)
       uPIm = g2[numPm[number][I]];
       uPIp = g2[numPp[number][I]];
     }
-
+    
     if (Dphi(FPoint0[0],FPoint0[1],I) < 0 ) {
       uij += Dphi(FPoint0[0],FPoint0[1],I)/hXIm * uXIm;
       coeff += Dphi(FPoint0[0],FPoint0[1],I)/hXIm;
@@ -452,7 +452,7 @@ double JacobiPDE::PDE(int number, int n)
       uij -= Dphi(FPoint0[0],FPoint0[1],I)/hXIp * uXIp;
       coeff -= Dphi(FPoint0[0],FPoint0[1],I)/hXIp;
     }
-
+    
     if (Dpi(FPoint0[0],FPoint0[1],I) < 0) {
       uij += Dpi(FPoint0[0],FPoint0[1],I)/hPIm * uPIm;
       coeff += Dpi(FPoint0[0],FPoint0[1],I)/hPIm;
@@ -460,7 +460,7 @@ double JacobiPDE::PDE(int number, int n)
       uij -= Dpi(FPoint0[0],FPoint0[1],I)/hPIp * uPIp;
       coeff -= Dpi(FPoint0[0],FPoint0[1],I)/hPIp;
     }
-
+    
     uij -= Dphiphi(FPoint0[0],FPoint0[1],I,I)
       *(uXIp*hXIm+uXIm*hXIp)/hXIp/hXIm/(hXIm+hXIp)
       + Dpipi(FPoint0[0],FPoint0[1],I,I)
@@ -507,7 +507,7 @@ double JacobiPDE::PDE(int number, int n)
 	  uPPpm = g2[numPPpm[number][I][J]];
 	  uPPpp = g2[numPPpp[number][I][J]];
 	}
-	
+
 	uij -=
 	  1./2*Dphiphi(FPoint0[0],FPoint0[1],I,J)*(uXXpp-uXXpm-uXXmp+uXXmm)
 	  /(hXIm+hXIp)/(hXJm+hXJp)
@@ -530,7 +530,7 @@ double JacobiPDE::PDE(int number, int n)
   }
 
   uij /= coeff;
-
+  
   return uij;
 }
 

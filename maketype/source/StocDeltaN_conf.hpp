@@ -35,9 +35,14 @@ public:
   void g2_logplot();
   void g2_loglinearplot();
   void g2_loglogplot();
+  void g3_plot();
+  void g3_logplot();
+  void g3_loglinearplot();
+  void g3_loglogplot();
   void calP_plot();
   double return_intf1();
   double return_intg2();
+  double return_intg3();
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
   virtual double metric(vector<double> &X, int I, int J);

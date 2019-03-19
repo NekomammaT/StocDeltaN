@@ -28,10 +28,12 @@ void StocDeltaN::init_fn()
       Omega[number] = false;
       f1[number] = 0;
       g2[number] = 0;
+      g3[number] = 0;
     } else {
       Omega[number] = true;
       f1[number] = rand()%10;
       g2[number] = (rand()%10)/10.;
+      g3[number] = (rand()%10)/10.;
     }
   }
 }
@@ -49,8 +51,9 @@ void StocDeltaN::solve()
   cout << model << endl;
   cout << "total # of sites: " << volume << endl;
   
-  PDE_solve(maxstep,tol,1); //solve f1
-  PDE_solve(maxstep,tol,-2);
+  PDE_solve(maxstep,tol,1); // solve f1
+  PDE_solve(maxstep,tol,-2); // solve g2
+  PDE_solve(maxstep,tol,-3); // solve g3
   
   string str = "Mn_" + model + ".dat";
   
@@ -508,6 +511,111 @@ void StocDeltaN::g2_loglogplot()
   g.close();
 }
 
+void StocDeltaN::g3_plot()
+{
+  string filename = "dN3_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<\\delta N^3>$"));
+    g.ylog();
+    g.plot(site[0],g3,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.log_contourf(site[0],site[1],g3,string("$\\mathrm{log}_{10}<\\delta N^3>$"));
+    g.plot(x1traj,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g3_logplot()
+{
+  string filename = "dN3_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x2abs;
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$\\phi^1$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.ylog();
+    g.log_contourf(site[0],site[1],g3,string("$\\mathrm{log}_{10}<\\delta N^3>$"));
+    g.plot(x1traj,x2abs,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g3_loglinearplot()
+{
+  string filename = "dN3_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 1) {
+    g.xlabel(string("$\\phi$"));
+    g.ylabel(string("$<\\delta N^3>$"));
+    g.xlog();
+    g.ylog();
+    g.plot(site[0],g3,1,string("b"));
+    g.save(filename);
+    g.show();
+  } else if (dim == 2) {
+    vector<double> x1abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$\\phi^2$"));
+    g.xlog();
+    g.log_contourf(site[0],site[1],g3,string("$\\mathrm{log}_{10}<\\delta N^3>$"));
+    g.plot(x1abs,x2traj,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
+void StocDeltaN::g3_loglogplot()
+{
+  string filename = "dN3_" + model + ".pdf";
+  matplotlibcpp g;
+  g.open();
+
+  if (dim == 2) {
+    vector<double> x1abs, x2abs;
+    for (auto& x1 : x1traj) {
+      x1abs.push_back(fabs(x1));
+    }
+    for (auto& x2 : x2traj) {
+      x2abs.push_back(fabs(x2));
+    }
+    
+    g.xlabel(string("$|\\phi^1|$"));
+    g.ylabel(string("$|\\phi^2|$"));
+    g.xlog();
+    g.ylog();
+    g.log_contourf(site[0],site[1],g3,string("$\\mathrm{log}_{10}<\\delta N^3>$"));
+    g.plot(x1abs,x2abs,3,string("r"));
+    g.save(filename);
+    g.show();
+  }
+  g.close();
+}
+
 void StocDeltaN::calP_plot()
 {
   string filename = "calP_" + model + ".pdf";
@@ -530,4 +638,9 @@ double StocDeltaN::return_intf1()
 double StocDeltaN::return_intg2()
 {
   return Interpolation_f(x,g2);
+}
+
+double StocDeltaN::return_intg3()
+{
+  return Interpolation_f(x,g3);
 }

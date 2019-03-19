@@ -117,13 +117,16 @@ JacobiPDE::JacobiPDE(vector< vector<double> > &Site, double Rhoc)
   f1_next = f1;
   g2 = f1;
   g2_next = f1;
+  g3 = f1;
+  g3_next = f1;
   Omega = vector<bool>(volume,true);
 
   for (int number=0; number<volume; number++) {
     for (int I=0; I<dim; I++) {
       FPoint[I] = No2X(number,I);
     }
-    
+
+    /*
     if (V(FPoint) < rhoc) {
       Omega[number] = false;
       f1[number] = 0;
@@ -133,6 +136,7 @@ JacobiPDE::JacobiPDE(vector< vector<double> > &Site, double Rhoc)
       f1[number] = rand()%10;
       g2[number] = (rand()%10)/10.;
     }
+    */
   }
 
   // -------------- reflecting b.c. --------------
@@ -248,6 +252,9 @@ double JacobiPDE::PDE(int number, int n)
     } else if (n == -2) {
       uXIm = g2[numXm[number][I]];
       uXIp = g2[numXp[number][I]];
+    } else if (n == -3) {
+      uXIm = g3[numXm[number][I]];
+      uXIp = g3[numXp[number][I]];
     }
 
     if (Dphi(FPoint0,I) < 0 ) {
@@ -277,16 +284,25 @@ double JacobiPDE::PDE(int number, int n)
 	  uXXmp = g2[numXXpm[number][J][I]];
 	  uXXpm = g2[numXXpm[number][I][J]];
 	  uXXpp = g2[numXXpp[number][I][J]];
+	} else if (n == -3) {
+	  uXXmm = g3[numXXmm[number][I][J]];
+	  uXXmp = g3[numXXpm[number][J][I]];
+	  uXXpm = g3[numXXpm[number][I][J]];
+	  uXXpp = g3[numXXpp[number][I][J]];
 	}
 	
 	uij -= 1./2*Dphiphi(FPoint0,I,J)*(uXXpp-uXXpm-uXXmp+uXXmm)
 	  /(hXIm+hXIp)/(hXJm+hXJp);
       }
 
+      // Cn
       if (n == -2) {
 	uij -= Dphiphi(FPoint0,I,J)*(f1[numXp[number][I]]-f1[numXm[number][I]])
 	  *(f1[numXp[number][J]]-f1[numXm[number][J]])/(hXIm+hXIp)/(hXJm+hXJp);
-      } // Cn
+      } else if (n == -3) {
+	uij -= 3*Dphiphi(FPoint0,I,J)*(f1[numXp[number][I]]-f1[numXm[number][I]])
+	  *(g2[numXp[number][J]]-g2[numXm[number][J]])/(hXIm+hXIp)/(hXJm+hXJp);
+      }
     }
   }
 
@@ -320,6 +336,10 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
 	    u_norm += g2[i]*g2[i];
 	    g2_next[i] = PDE(i,n);
 	    err += (g2[i]-g2_next[i])*(g2[i]-g2_next[i]);
+	  } else if (n == -3) {
+	    u_norm += g3[i]*g3[i];
+	    g3_next[i] = PDE(i,n);
+	    err += (g3[i]-g3_next[i])*(g3[i]-g3_next[i]);
 	  }
 	}
       }
@@ -329,6 +349,8 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
       f1 = f1_next;
     } else if (n == -2) {
       g2 = g2_next;
+    } else if (n == -3) {
+      g3 = g3_next;
     }
 
     err = sqrt(err)/sqrt(u_norm);
@@ -338,6 +360,9 @@ void JacobiPDE::PDE_solve(int maxstep, double tol, int n)
 	   << "  step: " << step << flush;
     } else if (n == -2) {
       cout << "\rerr for C2: " << setw(11) << left << err
+	   << "  step: " << step << flush;
+    } else if (n == -3) {
+      cout << "\rerr for C3: " << setw(11) << left << err
 	   << "  step: " << step << flush;
     }
     
@@ -443,6 +468,11 @@ double JacobiPDE::return_g2(vector<int> &index)
   return g2[Ind2No(index)];
 }
 
+double JacobiPDE::return_g3(vector<int> &index)
+{
+  return g3[Ind2No(index)];
+}
+
 void JacobiPDE::export_fg(string filename)
 {
   ofstream ofs(filename);
@@ -452,6 +482,7 @@ void JacobiPDE::export_fg(string filename)
       ofs << No2X(number,I) << ' ';
     }
     ofs << f1[number] << ' '
-	<< g2[number] << endl;
+	<< g2[number] << ' '
+	<< g3[number] << endl;
   }
 }

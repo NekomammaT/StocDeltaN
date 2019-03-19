@@ -18,7 +18,7 @@ using namespace std;
 class JacobiPDE
 {
 protected:
-  vector<double> f1, f1_next, g2, g2_next; // argument: number
+  vector<double> f1, f1_next, g2, g2_next, g3, g3_next; // argument: number
   vector< vector<double> > site, hI; // argument: I, siteNo
   vector<double> FPoint; // argument: I
   vector<bool> Omega; // argument: number
@@ -43,6 +43,7 @@ public:
   double Interpolation_f(vector<double> &X, vector<double> &f);
   double return_f1(vector<int> &index);
   double return_g2(vector<int> &index);
+  double return_g3(vector<int> &index);
   void export_fg(string filename);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
