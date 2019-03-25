@@ -27,7 +27,7 @@ JacobiPDE_conf.o: $(SOURCE)/JacobiPDE.hpp
 SRK32_conf.o: $(SOURCE)/SRK32.hpp
 endif
 
-clean:
+clean:	
 	$(RM) *.o
 	$(RM) $(SOURCE)/*.o	
 	$(RM) $(MODEL)
