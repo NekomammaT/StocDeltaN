@@ -1,23 +1,25 @@
 #include "../source/JacobiPDE.hpp"
 #include <sys/time.h>
 
-#define XMIN 0
-#define XMAX 20
-#define HX 1e-2
+#define XMIN -21
+#define XMAX 21
+#define HMIN (1e-8)
+#define HOV (1./20)
 
-#define MAXSTEP 100000
+#define MAXSTEP 100000000
 #define TOL 1e-10
 
-#define MPHI (1e-2)
+#define LAMBDA 0.01
+#define MU 20
 
-#define RHOC (MPHI*MPHI)
+#define RHOC (LAMBDA*LAMBDA*LAMBDA*LAMBDA*(sqrt(1+2*MU*MU)-1)/MU/MU)
 
 
-class Chaotic: virtual public JacobiPDE
+class Hilltop: virtual public JacobiPDE
 {
 public:
-  Chaotic(){}
-  Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params);
+  Hilltop(){}
+  Hilltop(vector< vector< vector<double> > > &Site, vector<double> &Params);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
   virtual double metric(vector<double> &X, int I, int J);
@@ -39,11 +41,13 @@ int main(int argc, char** argv)
   before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
 
 
-  double h = HX, sitev = XMIN;
+  double h, sitev = XMIN;
   vector<double> site;
   vector< vector<double> > xsite;
   vector< vector< vector<double> > > sitepack;
   while (sitev <= XMAX) {
+    h = max(fabs(sitev)*HOV,HMIN);
+    
     site.push_back(sitev);
     sitev += h;
   }
@@ -52,11 +56,11 @@ int main(int argc, char** argv)
 
   vector<double> params = {MAXSTEP,TOL,2,RHOC};
   
-  Chaotic chaotic(sitepack,params);
+  Hilltop hilltop(sitepack,params);
 
-  chaotic.PDE_solve(0);
-  chaotic.PDE_solve(1);
-  chaotic.export_fg("chaotic_conf.dat");
+  hilltop.PDE_solve(0);
+  hilltop.PDE_solve(1);
+  hilltop.export_fg("hilltop_conf.dat");
   
 
   gettimeofday(&tv, &tz);
@@ -65,38 +69,38 @@ int main(int argc, char** argv)
 }
 
 
-Chaotic::Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params):
+Hilltop::Hilltop(vector< vector< vector<double> > > &Site, vector<double> &Params):
   JacobiPDE(Site,Params)
 {
   BoundaryCondition();
 }
 
-double Chaotic::V(vector<double> &X)
+double Hilltop::V(vector<double> &X)
 {
-  return 1./2*MPHI*MPHI*X[0]*X[0];
+  return LAMBDA*LAMBDA*LAMBDA*LAMBDA*(1-X[0]*X[0]/MU/MU);
 }
 
-double Chaotic::VI(vector<double> &X, int I)
+double Hilltop::VI(vector<double> &X, int I)
 {
-  return MPHI*MPHI*X[0];
+  return -2*X[0]*LAMBDA*LAMBDA*LAMBDA*LAMBDA/MU/MU;
 }
 
-double Chaotic::metric(vector<double> &X, int I, int J)
-{
-  return 1;
-}
-
-double Chaotic::inversemetric(vector<double> &X, int I, int J)
+double Hilltop::metric(vector<double> &X, int I, int J)
 {
   return 1;
 }
 
-double Chaotic::affine(vector<double> &X, int I, int J, int K)
+double Hilltop::inversemetric(vector<double> &X, int I, int J)
+{
+  return 1;
+}
+
+double Hilltop::affine(vector<double> &X, int I, int J, int K)
 {
   return 0;
 }
 
-double Chaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
+double Hilltop::DI(int xp, int I, vector< vector<double> > &psv, int func)
 {
   double DI = 0;
 
@@ -107,12 +111,12 @@ double Chaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
   return DI;
 }
 
-double Chaotic::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
+double Hilltop::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
 {
   return V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
 }
 
-void Chaotic::BoundaryCondition()
+void Hilltop::BoundaryCondition()
 {
 #ifdef _OPENMP
 #pragma omp parallel for

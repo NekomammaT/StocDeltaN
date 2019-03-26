@@ -75,7 +75,8 @@ double JacobiPDE::affine(vector<double> &X, int I, int J, int K)
   }
 }
 
-double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L) {
+double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L)
+{
   double MM = 1e-3;
 
   if (L == 1) {
@@ -337,6 +338,8 @@ JacobiPDE::JacobiPDE(vector< vector< vector<double> > > &Site, vector<double> &P
     }
   }
 
+  cout << "total # of sites : " << volume << endl;
+
   ff = new vector<double>[funcNo];
   f_next = new vector<double>[funcNo];
 
@@ -384,7 +387,7 @@ double JacobiPDE::PDE_1step(int num, int func)
 	coeff += DItemp / hm[num][xp][I];
       } else {
 	uu -= DItemp / hp[num][xp][I] * ff[func][num_p[num][xp][I]];
-	coeff -= DItemp / hp[num][xp][I] * ff[func][num_p[num][xp][I]];
+	coeff -= DItemp / hp[num][xp][I];
       }
       
       uu -= DIJ(xp,I,xp,I,PSV0,func)

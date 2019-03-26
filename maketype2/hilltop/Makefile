@@ -1,4 +1,4 @@
-MODEL = chaotic_conf
+MODEL = hilltop_conf
 SOURCE = ../source
 
 CXX := g++-8
