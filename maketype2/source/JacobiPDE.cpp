@@ -97,16 +97,18 @@ double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L)
 solve (DI(xp,I) \partial_xpI + 1./2 DIJ(xpI,xpJ) \partial_xpI \partial_xpJ) f = CC
 func swithes f.
 */
-double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv, int func)
+double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
 {
   double DI;
 
   if (xp == 0) {
+    DI = 0;
+    
     for (int J=0; J<Idim; J++) {
       DI += inversemetric(psv[0],I,J)*psv[1][J]/H(psv[0],psv[1]);
 
       for (int K=0; K<Idim; K++) {
-	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv,func);
+	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
       }
     }
   } else {
@@ -115,16 +117,16 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv, int func)
 
     for (int J=0; J<Idim; J++) {
       for (int K=0; K<Idim; K++) {
-	DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv,func);
+	DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv);
 
 	for (int S=0; S<Idim; S++) {
 	  DI += affine(psv[0],S,I,J)*inversemetric(psv[0],J,K)*psv[1][K]*psv[1][S]/Hubble
-	    +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv,func);
+	    +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv);
 
 	  for (int R=0; R<Idim; R++) {
 	    DI -= 1./2*(affine(psv[0],R,J,K)*affine(psv[0],S,I,R)
 			+ affine(psv[0],R,I,J)*affine(psv[0],S,K,R))
-	      *psv[1][S]*DIJ(0,J,0,K,psv,func);
+	      *psv[1][S]*DIJ(0,J,0,K,psv);
 	  }
 	}
       }
@@ -134,31 +136,34 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv, int func)
   return DI;
 }
 
-double JacobiPDE::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
+double JacobiPDE::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
 {
   double DDIJ;
 
   if (xpI == 0 && xpJ == 0) {
     DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
   } else if (xpI == 1 && xpJ == 1) {
+    DDIJ = 0;
     for (int K=0; K<Idim; K++) {
       for (int L=0; L<Idim; L++) {
 	for (int M=0; M<Idim; M++) {
 	  for (int N=0; N<Idim; N++) {
 	    DDIJ += affine(psv[0],K,I,L)*psv[1][K]*affine(psv[0],M,J,N)*psv[1][M]
-	      *DIJ(0,L,0,N,psv,func);
+	      *DIJ(0,L,0,N,psv);
 	  }
 	}
       }
     }
   } else if (xpI == 0) {
+    DDIJ = 0;
+    
     for (int K=0; K<Idim; K++) {
       for (int L=0; L<Idim; L++) {
-	DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv,func);
+	DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv);
       }
     }
   } else {
-    DDIJ = DIJ(xpJ,J,xpI,I,psv,func);
+    DDIJ = DIJ(xpJ,J,xpI,I,psv);
   }
   
   return DDIJ;
@@ -175,7 +180,7 @@ double JacobiPDE::CC(int num, vector< vector<double> > &psv, int func)
       for (int I=0; I<Idim; I++) {
 	for (int xpJ=0; xpJ<xpdim; xpJ++) {
 	  for (int J=0; J<Idim; J++) {
-	    CC -= DIJ(xpI,I,xpJ,J,psv,func)
+	    CC -= DIJ(xpI,I,xpJ,J,psv)
 	      *(ff[0][num_p[num][xpI][I]] - ff[0][num_m[num][xpI][I]])
 	      *(ff[0][num_p[num][xpJ][J]] - ff[0][num_m[num][xpJ][J]])
 	      /(hp[num][xpI][I]+hm[num][xpI][I])/(hp[num][xpJ][J]+hm[num][xpJ][J]);
@@ -300,6 +305,7 @@ void JacobiPDE::BoundaryCondition()
 // ---------------------------------------------------------
 
 
+
 JacobiPDE::JacobiPDE(vector< vector< vector<double> > > &Site, vector<double> &Params)
 {
   srand((unsigned)time(NULL)); // initialize random seed
@@ -362,8 +368,6 @@ JacobiPDE::JacobiPDE(vector< vector< vector<double> > > &Site, vector<double> &P
 					  vector< vector<double> >(xpdim,
 								   vector<double>(Idim,0)));
   hm = hp;
-    
-  //BoundaryCondition();
 }
 
 double JacobiPDE::PDE_1step(int num, int func)
@@ -380,7 +384,7 @@ double JacobiPDE::PDE_1step(int num, int func)
 
   for (int xp=0; xp<xpdim; xp++) {
     for (int I=0; I<Idim; I++) {
-      double DItemp = DI(xp,I,PSV0,func);
+      double DItemp = DI(xp,I,PSV0);
       
       if (DItemp < 0) {
 	uu += DItemp / hm[num][xp][I] * ff[func][num_m[num][xp][I]];
@@ -390,15 +394,15 @@ double JacobiPDE::PDE_1step(int num, int func)
 	coeff -= DItemp / hp[num][xp][I];
       }
       
-      uu -= DIJ(xp,I,xp,I,PSV0,func)
+      uu -= DIJ(xp,I,xp,I,PSV0)
 	*(ff[func][num_p[num][xp][I]]*hm[num][xp][I]+ff[func][num_m[num][xp][I]]*hp[num][xp][I])
 	/hp[num][xp][I]/hm[num][xp][I]/(hp[num][xp][I]+hm[num][xp][I]);
-      coeff -= DIJ(xp,I,xp,I,PSV0,func)/hp[num][xp][I]/hm[num][xp][I];
+      coeff -= DIJ(xp,I,xp,I,PSV0)/hp[num][xp][I]/hm[num][xp][I];
 
       for (int xptemp=0; xptemp<xpdim; xptemp++) {
 	for (int J=0; J<Idim; J++) {
 	  if (xp!=xptemp || I!=J) {
-	    uu -= 1./2*DIJ(xp,I,xptemp,J,PSV0,func)
+	    uu -= 1./2*DIJ(xp,I,xptemp,J,PSV0)
 	      *(ff[func][num_pp[num][xp][I][xptemp][J]]-ff[func][num_pm[num][xp][I][xptemp][J]]
 		-ff[func][num_pm[num][xptemp][J][xp][I]]+ff[func][num_mm[num][xp][I][xptemp][J]])
 	      /(hp[num][xp][I]+hm[num][xp][I])/(hp[num][xptemp][J]+hm[num][xptemp][J]);
@@ -496,6 +500,8 @@ double JacobiPDE::No2PSV(int num, int xp, int I)
 {
   return site[xp][I][No2Ind(num,xp,I)];
 }
+
+double JacobiPDE::Interpolation_f(vector< vector<double> > &psv, int func) /////////////////
 
 void JacobiPDE::export_fg(string filename)
 {

@@ -1,5 +1,28 @@
 #include "../source/JacobiPDE.hpp"
+#include "../source/SRK32.hpp"
 #include <sys/time.h>
+
+
+class DoubleChaotic: virtual public JacobiPDE, virtual public SRKintegrater
+{
+protected:
+  int xpdim,Idim;
+  
+public:
+  DoubleChaotic(){}
+  DoubleChaotic(vector< vector< vector<double> > > &Site, vector<double> &Params,
+		vector< vector<double> > &XPi, double T0, int NoiseDim);
+  virtual double V(vector<double> &X);
+  virtual double VI(vector<double> &X, int I);
+  virtual double metric(vector<double> &X, int I, int J);
+  virtual double inversemetric(vector<double> &X, int I, int J);
+  virtual double affine(vector<double> &X, int I, int J, int K);
+  virtual double DI(int xp, int I, vector< vector<double> > &psv);
+  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
+  virtual double gIa(int xp, int I, int alpha, vector< vector<double> > &psv);
+  virtual void BoundaryCondition();
+};
+
 
 #define PHIMIN -5
 #define PHIMAX 20
@@ -16,21 +39,9 @@
 
 #define RHOC (MPSI*MPSI)
 
-
-class DoubleChaotic: virtual public JacobiPDE
-{
-public:
-  DoubleChaotic(){}
-  DoubleChaotic(vector< vector< vector<double> > > &Site, vector<double> &Params);
-  virtual double V(vector<double> &X);
-  virtual double VI(vector<double> &X, int I);
-  virtual double metric(vector<double> &X, int I, int J);
-  virtual double inversemetric(vector<double> &X, int I, int J);
-  virtual double affine(vector<double> &X, int I, int J, int K);
-  virtual double DI(int xp, int I, vector< vector<double> > &psv, int func);
-  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func);
-  virtual void BoundaryCondition();
-};
+#define PHIIN 13
+#define PSIIN 13
+#define TIMESTEP (1e-2)
 
 
 int main(int argc, char** argv)
@@ -67,11 +78,24 @@ int main(int argc, char** argv)
 
   vector<double> params = {MAXSTEP,TOL,2,RHOC};
 
-  DoubleChaotic dc(sitepack,params);
+  vector<double> xi = {PHIIN,PSIIN};
+  vector< vector<double> > xpi;
+  xpi.push_back(xi);
+  
+  DoubleChaotic dc(sitepack,params,xpi,0,xpi[0].size());
+  ofstream trajfile("traj_double_chaotic_conf.dat");
 
   dc.PDE_solve(0);
   dc.PDE_solve(1);
-  dc.export_fg("double_chaotic_conf.dat");
+  dc.export_fg("Mn_double_chaotic_conf.dat");
+  
+  while (dc.return_V() >= RHOC) {
+    dc.SRK2(TIMESTEP);
+
+    trajfile << dc.return_t() << ' '
+	     << dc.return_xp(0,0) << ' '
+	     << dc.return_xp(0,1) << endl;
+  }
 
 
   gettimeofday(&tv, &tz);
@@ -80,9 +104,12 @@ int main(int argc, char** argv)
 }
 
 
-DoubleChaotic::DoubleChaotic(vector< vector< vector<double> > > &Site, vector<double> &Params):
-  JacobiPDE(Site,Params)
+DoubleChaotic::DoubleChaotic(vector< vector< vector<double> > > &Site, vector<double> &Params,
+			     vector< vector<double> > &XPi, double T0, int NoiseDim):
+  JacobiPDE(Site,Params), SRKintegrater(XPi,T0,NoiseDim)
 {
+  xpdim = JacobiPDE::xpdim;
+  Idim = JacobiPDE::Idim;
   BoundaryCondition();
 }
 
@@ -119,7 +146,7 @@ double DoubleChaotic::affine(vector<double> &X, int I, int J, int K)
   return 0;
 }
 
-double DoubleChaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
+double DoubleChaotic::DI(int xp, int I, vector< vector<double> > &psv)
 {
   double DI = 0;
 
@@ -130,9 +157,14 @@ double DoubleChaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
   return DI;
 }
 
-double DoubleChaotic::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
+double DoubleChaotic::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
 {
   return V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
+}
+
+double DoubleChaotic::gIa(int xp, int I, int alpha, vector< vector<double> > &psv)
+{
+  return sqrt(V(psv[0])/3.)/2./M_PI * vielbein(psv,I,alpha);
 }
 
 void DoubleChaotic::BoundaryCondition()

@@ -1,4 +1,4 @@
-MODEL = Laplace
+MODEL = Laplace2
 SOURCE = ../source
 
 CXX := g++-8

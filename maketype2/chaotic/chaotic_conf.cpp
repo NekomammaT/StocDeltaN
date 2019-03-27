@@ -23,8 +23,8 @@ public:
   virtual double metric(vector<double> &X, int I, int J);
   virtual double inversemetric(vector<double> &X, int I, int J);
   virtual double affine(vector<double> &X, int I, int J, int K);
-  virtual double DI(int xp, int I, vector< vector<double> > &psv, int func);
-  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func);
+  virtual double DI(int xp, int I, vector< vector<double> > &psv);
+  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
   virtual void BoundaryCondition();
 };
 
@@ -96,7 +96,7 @@ double Chaotic::affine(vector<double> &X, int I, int J, int K)
   return 0;
 }
 
-double Chaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
+double Chaotic::DI(int xp, int I, vector< vector<double> > &psv)
 {
   double DI = 0;
 
@@ -107,7 +107,7 @@ double Chaotic::DI(int xp, int I, vector< vector<double> > &psv, int func)
   return DI;
 }
 
-double Chaotic::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
+double Chaotic::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
 {
   return V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
 }

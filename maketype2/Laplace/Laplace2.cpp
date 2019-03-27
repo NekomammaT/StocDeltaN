@@ -5,8 +5,8 @@ class Test: virtual public JacobiPDE
 public:
   Test(){}
   Test(vector< vector< vector<double> > > &Site, vector<double> &Params);
-  virtual double DI(int xp, int I, vector< vector<double> > &psv, int func);
-  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func);
+  virtual double DI(int xp, int I, vector< vector<double> > &psv);
+  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
   virtual double CC(int num, vector< vector<double> > &psv, int func);
   virtual void BoundaryCondition();
 };
@@ -38,12 +38,12 @@ Test::Test(vector< vector< vector<double> > > &Site, vector<double> &Params):
 solve (DI(xp,I) \partial_xpI + 1./2 DIJ(xpI,xpJ) \partial_xpI \partial_xpJ) f = CC
 func swithes f.
 */
-double Test::DI(int xp, int I, vector< vector<double> > &psv, int func)
+double Test::DI(int xp, int I, vector< vector<double> > &psv)
 {
   return 0;
 }
 
-double Test::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv, int func)
+double Test::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
 {
   if (xpI == xpJ && I == J) {
     return 1;

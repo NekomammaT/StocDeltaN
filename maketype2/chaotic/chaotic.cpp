@@ -1,5 +1,25 @@
 #include "../source/JacobiPDE.hpp"
+#include "../source/SRK32.hpp"
 #include <sys/time.h>
+
+
+class Chaotic: virtual public JacobiPDE, virtual public SRKintegrater
+{
+protected:
+  int xpdim,Idim;
+  
+public:
+  Chaotic(){}
+  Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params,
+	  vector< vector<double> > &XPi, double T0, int NoiseDim);
+  virtual double V(vector<double> &X);
+  virtual double VI(vector<double> &X, int I);
+  virtual double metric(vector<double> &X, int I, int J);
+  virtual double inversemetric(vector<double> &X, int I, int J);
+  virtual double affine(vector<double> &X, int I, int J, int K);
+  virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
+};
+
 
 #define XMIN 0
 #define XMAX 15
@@ -16,19 +36,9 @@
 
 #define RHOC (MPHI*MPHI)
 
-
-class Chaotic: virtual public JacobiPDE
-{
-public:
-  Chaotic(){}
-  Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params);
-  virtual double V(vector<double> &X);
-  virtual double VI(vector<double> &X, int I);
-  virtual double metric(vector<double> &X, int I, int J);
-  virtual double inversemetric(vector<double> &X, int I, int J);
-  virtual double affine(vector<double> &X, int I, int J, int K);
-  virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
-};
+#define PHIIN 13
+#define PIN -(5e-6)
+#define TIMESTEP (1e-2)
 
 
 int main(int argc, char** argv)
@@ -68,11 +78,22 @@ int main(int argc, char** argv)
 
   vector<double> params = {MAXSTEP,TOL,2,RHOC};
 
-  Chaotic chaotic(sitepack,params);
+  vector< vector<double> > xpi = {{PHIIN},{PIN}};
+
+  Chaotic chaotic(sitepack,params,xpi,0,xpi[0].size());
+  ofstream trajfile("traj_chaotic.dat");
 
   chaotic.PDE_solve(0);
   chaotic.PDE_solve(1);
-  chaotic.export_fg("chaotic.dat");
+  chaotic.export_fg("Mn_chaotic.dat");
+
+  while (3*chaotic.return_H()*chaotic.return_H() >= RHOC) {
+    chaotic.SRK2(TIMESTEP);
+    
+    trajfile << chaotic.return_t() << ' '
+	     << chaotic.return_xp(0,0) << ' '
+	     << chaotic.return_xp(1,0) << endl;
+  }
 
 
   gettimeofday(&tv, &tz);
@@ -82,9 +103,12 @@ int main(int argc, char** argv)
 
 
 
-Chaotic::Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params):
-  JacobiPDE(Site,Params)
+Chaotic::Chaotic(vector< vector< vector<double> > > &Site, vector<double> &Params,
+		 vector< vector<double> > &XPi, double T0, int NoiseDim):
+  JacobiPDE(Site,Params), SRKintegrater(XPi,T0,NoiseDim)
 {
+  xpdim = JacobiPDE::xpdim;
+  Idim = JacobiPDE::Idim;
   BoundaryCondition();
 }
 
