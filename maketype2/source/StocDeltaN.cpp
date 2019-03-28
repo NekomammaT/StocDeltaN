@@ -1,8 +1,6 @@
 #include "StocDeltaN.hpp"
 #include "matplotlibcpp.hpp"
 
-int main(){}
-
 StocDeltaN::StocDeltaN(string Model, vector< vector< vector<double> > > &Site,
 		       vector< vector<double> > &XPi, double T0, vector<double> &Params):
   JacobiPDE(Site,Params), SRKintegrater(XPi,T0,Params[4])
@@ -29,7 +27,7 @@ void StocDeltaN::solve()
 {
   PDE_solve(0);
   PDE_solve(1);
-
+  
   string str = "Mn_" + model + ".dat";
 
   export_fg(str);
@@ -111,7 +109,7 @@ void StocDeltaN::solve()
 
     for (double N=0; N<Nmax; N+=deltaN) {
       dN2 = 0;
-      deltaN = 0;
+      dataNo = 0;
 
       for (int list=0; list<dN2data.size(); list++) {
 	if (N <= dN2data[list][0] && dN2data[list][0] < N+deltaN) {
@@ -467,6 +465,238 @@ void StocDeltaN::sample_loglogplot()
   g.close();
 }
 
+void StocDeltaN::f_plot(int func)
+{
+  string filename;
+  if (func == 0) {
+    filename = "N_" + model + ".pdf";
+  } else if (func == 1) {
+    filename = "dN2_" + model + ".pdf";
+  }
+  matplotlibcpp g;
+  g.open();
+  
+  if (xpdim == 1) {
+    if (Idim == 1) {
+      g.xlabel(string("$\\phi$"));
+      if (func == 0) {
+	g.ylabel(string("$<N>$"));
+      } else if (func == 1) {
+	g.ylabel(string("$<\\delta N^2>$"));
+	g.ylog();
+      }
+      g.plot(site[0][0],ff[func],1,string("b"));
+      g.save(filename);
+      g.show();
+    } else if (Idim == 2) {
+      g.xlabel(string("$\\phi^1$"));
+      g.ylabel(string("$\\phi^2$"));
+      if (func == 0) {
+	g.contourf(site[0][0],site[0][1],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[0][1],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1traj,x2traj,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  } else if (xpdim == 2) {
+    if (Idim == 1) {
+      g.xlabel(string("$\\phi$"));
+      g.ylabel(string("$\\pi$"));
+      if (func == 0) {
+	g.contourf(site[0][0],site[1][0],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[1][0],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1traj,p1traj,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  }
+  g.close();
+}
+
+void StocDeltaN::f_logplot(int func)
+{
+  string filename;
+  if (func == 0) {
+    filename = "N_" + model + ".pdf";
+  } else if (func == 1) {
+    filename = "dN2_" + model + ".pdf";
+  }
+  matplotlibcpp g;
+  g.open();
+  
+  if (xpdim == 1) {
+    if (Idim == 2) {
+      vector<double> x2abs;
+      for (auto& x2 : x2traj) {
+	x2abs.push_back(fabs(x2));
+      }
+      
+      g.xlabel(string("$\\phi^1$"));
+      g.ylabel(string("$|\\phi^2|$"));
+      g.ylog();
+      if (func == 0) {
+	g.contourf(site[0][0],site[0][1],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[0][1],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1traj,x2abs,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  } else if (xpdim == 2) {
+    if (Idim == 1) {
+      vector<double> p1abs, p1siteabs;
+      for (auto& p1 : p1traj) {
+	p1abs.push_back(fabs(p1));
+      }
+      for (auto& p1site : site[1][0]) {
+	p1siteabs.push_back(fabs(p1site));
+      }
+      
+      g.xlabel(string("$\\phi$"));
+      g.ylabel(string("$|\\pi|$"));
+      g.ylog();
+      if (func == 0) {
+	g.contourf(site[0][0],p1siteabs,ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],p1siteabs,ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1traj,p1abs,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  }
+  g.close();
+}
+
+void StocDeltaN::f_loglinearplot(int func)
+{
+  string filename;
+  if (func == 0) {
+    filename = "N_" + model + ".pdf";
+  } else if (func == 1) {
+    filename = "dN2_" + model + ".pdf";
+  }
+  matplotlibcpp g;
+  g.open();
+  
+  if (xpdim == 1) {
+    if (Idim == 1) {
+      g.xlabel(string("$\\phi$"));
+      if (func == 0) {
+	g.ylabel(string("$<N>$"));
+      } else if (func == 1) {
+	g.ylabel(string("$<\\delta N^2>$"));
+      }
+      g.xlog();
+      g.plot(site[0][0],ff[func],1,string("b"));
+      g.save(filename);
+      g.show();
+    } else if (Idim == 2) {
+      vector<double> x1abs;
+      for (auto& x1 : x1traj) {
+	x1abs.push_back(fabs(x1));
+      }
+      
+      g.xlabel(string("$|\\phi^1|$"));
+      g.ylabel(string("$\\phi^2$"));
+      g.xlog();
+      if (func == 0) {
+	g.contourf(site[0][0],site[0][1],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[0][1],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1abs,x2traj,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  } else if (xpdim == 2) {
+    if (Idim == 1) {
+      vector<double> x1abs;
+      for (auto& x1 : x1traj) {
+	x1abs.push_back(fabs(x1));
+      }
+      
+      g.xlabel(string("$|\\phi|$"));
+      g.ylabel(string("$\\pi$"));
+      g.xlog();
+      if (func == 0) {
+	g.contourf(site[0][0],site[1][0],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[1][0],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1abs,p1traj,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  }
+  g.close();
+}
+
+void StocDeltaN::f_loglogplot(int func)
+{
+  string filename;
+  if (func == 0) {
+    filename = "N_" + model + ".pdf";
+  } else if (func == 1) {
+    filename = "dN2_" + model + ".pdf";
+  }
+  matplotlibcpp g;
+  g.open();
+  
+  if (xpdim == 1) {
+    if (Idim == 2) {
+      vector<double> x1abs, x2abs;
+      for (int i=0; i<x1traj.size(); i++) {
+	x1abs.push_back(fabs(x1traj[i]));
+	x2abs.push_back(fabs(x2traj[i]));
+      }
+      
+      g.xlabel(string("$|\\phi^1|$"));
+      g.ylabel(string("$|\\phi^2|$"));
+      g.xlog();
+      g.ylog();
+      if (func == 0) {
+	g.contourf(site[0][0],site[0][1],ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],site[0][1],ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1abs,x2abs,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  } else if (xpdim == 2) {
+    if (Idim == 1) {
+      vector<double> x1abs, p1abs, p1siteabs;
+      for (int i=0; i<x1traj.size(); i++) {
+	x1abs.push_back(fabs(x1traj[i]));
+	p1abs.push_back(fabs(p1traj[i]));
+      }
+      for (auto& p1site : site[1][0]) {
+	p1siteabs.push_back(fabs(p1site));
+      }
+      
+      g.xlabel(string("$|\\phi|$"));
+      g.ylabel(string("$|\\pi|$"));
+      g.xlog();
+      g.ylog();
+      if (func == 0) {
+	g.contourf(site[0][0],p1siteabs,ff[func],string("$<N>$"));
+      } else if (func == 1) {
+	g.log_contourf(site[0][0],p1siteabs,ff[func],string("$<\\delta N^2>$"));
+      }
+      g.plot(x1abs,p1abs,3,string("r"));
+      g.save(filename);
+      g.show();
+    }
+  }
+  g.close();
+}
+
 void StocDeltaN::calP_plot()
 {
   string filename = "calP_" + model + ".pdf";
@@ -476,7 +706,7 @@ void StocDeltaN::calP_plot()
   g.ylabel(string("$\\mathcal{P}_\\zeta$"));
   g.ylog();
   g.plot(Ndata,calPdata,1,string("b"));
-  g.save(filenam);
+  g.save(filename);
   g.show();
   g.close();
 }
@@ -485,49 +715,3 @@ double StocDeltaN::return_intf(int func)
 {
   return Interpolation_f(xx,func);
 }
-
-double StocDeltaN::H(vector<double> &X, vector<double> &P)
-{
-  return 0;
-}
-double StocDeltaN::V(vector<double> &X)
-{
-  return 0;
-}
-double StocDeltaN::VI(vector<double> &X, int I)
-{
-  return 0;
-}
-double StocDeltaN::metric(vector<double> &X, int I, int J)
-{
-  return 0;
-}
-double StocDeltaN::inversemetric(vector<double> &X, int I, int J)
-{
-  return 0;
-}
-double StocDeltaN::affine(vector<double> &X, int I, int J, int K)
-{
-  return 0;
-}
-double StocDeltaN::derGamma(vector<double> &X, int I, int J, int K, int L)
-{
-  return 0;
-}
-double StocDeltaN::DI(int xp, int I, vector< vector<double> > &psv)
-{
-  return 0;
-}
-double StocDeltaN::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
-{
-  return 0;
-}
-double StocDeltaN::gIa(int xp, int I, int alpha, vector< vector<double> > &psv)
-{
-  return 0;
-}
-double StocDeltaN::CC(int num, vector< vector<double> > &psv, int func)
-{
-  return 0;
-}
-void StocDeltaN::BoundaryCondition(){}

@@ -96,7 +96,7 @@ void matplotlibcpp::contourf(vector<double> X, vector<double> Y, vector<double> 
   fprintf(p, "X, Y = np.meshgrid(x,y)\n");
   fprintf(p, "Z = np.zeros((%d,%d))\n", ysize, xsize);
   for (int i=0; i<Z.size(); i++) {
-    fprintf(p, "Z[%d,%d] = %f\n", i%ysize, i/ysize, Z[i]);
+    fprintf(p, "Z[%d,%d] = %f\n", i/xsize, i%xsize, Z[i]);
   }
   fprintf(p, "CF = plt.contourf(X,Y,Z)\n");
   fprintf(p, "CB = plt.colorbar(CF)\n");
@@ -123,7 +123,7 @@ void matplotlibcpp::log_contourf(vector<double> X, vector<double> Y, vector<doub
   fprintf(p, "X, Y = np.meshgrid(x,y)\n");
   fprintf(p, "Z = np.zeros((%d,%d))\n", ysize, xsize);
   for (int i=0; i<Z.size(); i++) {
-    fprintf(p, "Z[%d,%d] = %f\n", i%ysize, i/ysize, log10(Z[i]));
+    fprintf(p, "Z[%d,%d] = %f\n", i/xsize, i%xsize, log10(Z[i]));
   }
   fprintf(p, "CF = plt.contourf(X,Y,Z)\n");
   fprintf(p, "CB = plt.colorbar(CF)\n");

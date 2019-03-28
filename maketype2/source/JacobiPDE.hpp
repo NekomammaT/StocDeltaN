@@ -49,6 +49,8 @@ public:
   int Ind2No(vector< vector<int> > &index); // index set to site number
   int No2Ind(int num, int xp, int I); // site number to index of xpI
   double No2PSV(int num, int xp, int I); // site number to phase-space value of xpI
+  int ceilXP(int xp, int I, vector< vector<double> > &psv);
+  double Interpolation_f(vector< vector<double> > &psv, int func);
   void export_fg(string filename);
   virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);

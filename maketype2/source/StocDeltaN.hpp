@@ -26,6 +26,10 @@ public:
   void sample_logplot();
   void sample_loglinearplot();
   void sample_loglogplot();
+  void f_plot(int func);
+  void f_logplot(int func);
+  void f_loglinearplot(int func);
+  void f_loglogplot(int func);
   void calP_plot();
   double return_intf(int func);
   virtual double H(vector<double> &X, vector<double> &P);

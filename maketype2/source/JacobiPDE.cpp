@@ -501,7 +501,55 @@ double JacobiPDE::No2PSV(int num, int xp, int I)
   return site[xp][I][No2Ind(num,xp,I)];
 }
 
-double JacobiPDE::Interpolation_f(vector< vector<double> > &psv, int func) /////////////////
+int JacobiPDE::ceilXP(int xp, int I, vector< vector<double> > &psv)
+{
+  int index = 0;
+
+  while (site[xp][I][index] <= psv[xp][I]) {
+    index++;
+  }
+
+  return index;
+}
+
+double JacobiPDE::Interpolation_f(vector< vector<double> > &psv, int func)
+{
+  int pmcheck, xpsite = pow(2,Idim);
+  double weight, intf = 0;
+  vector< vector<int> > index(xpdim,vector<int>(Idim,0));
+  
+  for (int num=0; num<pow(2,Idim*xpdim); num++) {
+    weight = 1;
+    
+    for (int xp=0; xp<xpdim; xp++) {
+      for (int I=0; I<Idim; I++) {
+	pmcheck = num;
+
+	for (int xptemp=0; xptemp<xp; xptemp++) {
+	  pmcheck /= xpsite;
+	}
+	pmcheck %= xpsite;
+
+	for (int J=0; J<I; J++) {
+	  pmcheck /= 2;
+	}
+	pmcheck %= 2;
+
+	if (pmcheck == 1) {
+	  index[xp][I] = ceilXP(xp,I,psv);
+	  weight *= (psv[xp][I]-site[xp][I][ceilXP(xp,I,psv)-1])/hI[xp][I][ceilXP(xp,I,psv)-1];
+	} else {
+	  index[xp][I] = ceilXP(xp,I,psv)-1;
+	  weight *= (site[xp][I][ceilXP(xp,I,psv)]-psv[xp][I])/hI[xp][I][ceilXP(xp,I,psv)-1];
+	}
+      }
+    }
+
+    intf += ff[func][Ind2No(index)]*weight;
+  }
+
+  return intf;
+}
 
 void JacobiPDE::export_fg(string filename)
 {
