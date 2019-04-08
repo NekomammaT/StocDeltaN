@@ -99,34 +99,40 @@ func swithes f.
 */
 double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
 {
-  double DI;
+  double DI = 0;
 
-  if (xp == 0) {
-    DI = 0;
-    
+  if (xpdim == 1) {
     for (int J=0; J<Idim; J++) {
-      DI += inversemetric(psv[0],I,J)*psv[1][J]/H(psv[0],psv[1]);
-
-      for (int K=0; K<Idim; K++) {
-	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
-      }
+      DI -= inversemetric(psv[0],I,J)*VI(psv[0],J)/V(psv[0]);
     }
-  } else {
-    double Hubble = H(psv[0],psv[1]);
-    DI = -3*psv[1][I]-VI(psv[0],I)/Hubble;
-
-    for (int J=0; J<Idim; J++) {
-      for (int K=0; K<Idim; K++) {
-	DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv);
-
-	for (int S=0; S<Idim; S++) {
-	  DI += affine(psv[0],S,I,J)*inversemetric(psv[0],J,K)*psv[1][K]*psv[1][S]/Hubble
-	    +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv);
-
-	  for (int R=0; R<Idim; R++) {
-	    DI -= 1./2*(affine(psv[0],R,J,K)*affine(psv[0],S,I,R)
-			+ affine(psv[0],R,I,J)*affine(psv[0],S,K,R))
-	      *psv[1][S]*DIJ(0,J,0,K,psv);
+  } else if (xpdim == 2) {
+    if (xp == 0) {
+      DI = 0;
+      
+      for (int J=0; J<Idim; J++) {
+	DI += inversemetric(psv[0],I,J)*psv[1][J]/H(psv[0],psv[1]);
+	
+	for (int K=0; K<Idim; K++) {
+	  DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
+	}
+      }
+    } else {
+      double Hubble = H(psv[0],psv[1]);
+      DI = -3*psv[1][I]-VI(psv[0],I)/Hubble;
+      
+      for (int J=0; J<Idim; J++) {
+	for (int K=0; K<Idim; K++) {
+	  DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv);
+	  
+	  for (int S=0; S<Idim; S++) {
+	    DI += affine(psv[0],S,I,J)*inversemetric(psv[0],J,K)*psv[1][K]*psv[1][S]/Hubble
+	      +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv);
+	    
+	    for (int R=0; R<Idim; R++) {
+	      DI -= 1./2*(affine(psv[0],R,J,K)*affine(psv[0],S,I,R)
+			  + affine(psv[0],R,I,J)*affine(psv[0],S,K,R))
+		*psv[1][S]*DIJ(0,J,0,K,psv);
+	    }
 	  }
 	}
       }
@@ -139,31 +145,35 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
 double JacobiPDE::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv)
 {
   double DDIJ;
-
-  if (xpI == 0 && xpJ == 0) {
-    DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
-  } else if (xpI == 1 && xpJ == 1) {
-    DDIJ = 0;
-    for (int K=0; K<Idim; K++) {
-      for (int L=0; L<Idim; L++) {
-	for (int M=0; M<Idim; M++) {
-	  for (int N=0; N<Idim; N++) {
-	    DDIJ += affine(psv[0],K,I,L)*psv[1][K]*affine(psv[0],M,J,N)*psv[1][M]
-	      *DIJ(0,L,0,N,psv);
+  
+  if (xpdim == 1) {
+    DDIJ = V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
+  } else if (xpdim == 2) {
+    if (xpI == 0 && xpJ == 0) {
+      DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
+    } else if (xpI == 1 && xpJ == 1) {
+      DDIJ = 0;
+      for (int K=0; K<Idim; K++) {
+	for (int L=0; L<Idim; L++) {
+	  for (int M=0; M<Idim; M++) {
+	    for (int N=0; N<Idim; N++) {
+	      DDIJ += affine(psv[0],K,I,L)*psv[1][K]*affine(psv[0],M,J,N)*psv[1][M]
+		*DIJ(0,L,0,N,psv);
+	    }
 	  }
 	}
       }
-    }
-  } else if (xpI == 0) {
-    DDIJ = 0;
-    
-    for (int K=0; K<Idim; K++) {
-      for (int L=0; L<Idim; L++) {
-	DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv);
+    } else if (xpI == 0) {
+      DDIJ = 0;
+      
+      for (int K=0; K<Idim; K++) {
+	for (int L=0; L<Idim; L++) {
+	  DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv);
+	}
       }
+    } else {
+      DDIJ = DIJ(xpJ,J,xpI,I,psv);
     }
-  } else {
-    DDIJ = DIJ(xpJ,J,xpI,I,psv);
   }
   
   return DDIJ;
@@ -207,16 +217,16 @@ void JacobiPDE::BoundaryCondition()
 	PSV0[xp][I] = No2PSV(number,xp,I);
       }
     }
-
-    if (3*H(PSV0[0],PSV0[1])*H(PSV0[0],PSV0[1]) < rhoc) {
+    
+    if (EndSurface(PSV0)) {
+      Omega[number] = true;
+      for (int func=0; func<funcNo; func++) {
+	ff[func][number] = rand()%1;
+      }
+    } else {
       Omega[number] = false;
       for (int func=0; func<funcNo; func++) {
 	ff[func][number] = 0;
-      }
-    } else {
-      Omega[number] = true;
-      for (int func=0; func<funcNo; func++) {
-	ff[func][number] = rand()%10;
       }
     }
     
@@ -298,6 +308,17 @@ void JacobiPDE::BoundaryCondition()
 	}
       }
     }
+  }
+}
+
+bool JacobiPDE::EndSurface(vector< vector<double> > &psv)
+{
+  if (xpdim == 1) {
+    return V(psv[0]) >= rhoc;
+  } else if (xpdim == 2) {
+    return 3*H(psv[0],psv[1])*H(psv[0],psv[1]) >= rhoc;
+  } else {
+    return 0;
   }
 }
 

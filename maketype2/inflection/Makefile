@@ -1,4 +1,4 @@
-MODEL = chaotic_conf
+MODEL = inflection
 SOURCE = ../source
 
 CXX := g++-8

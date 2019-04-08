@@ -63,6 +63,7 @@ public:
   virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
   virtual double CC(int num, vector< vector<double> > &psv, int func);
   virtual void BoundaryCondition();
+  virtual bool EndSurface(vector< vector<double> > &psv);
 };
 
 #endif

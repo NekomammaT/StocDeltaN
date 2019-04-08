@@ -32,18 +32,19 @@ public:
   void f_loglogplot(int func);
   void calP_plot();
   double return_intf(int func);
-  virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);
   virtual double metric(vector<double> &X, int I, int J);
   virtual double inversemetric(vector<double> &X, int I, int J);
   virtual double affine(vector<double> &X, int I, int J, int K);
   virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
-  virtual double DI(int xp, int I, vector< vector<double> > &psv);
-  virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
-  virtual double gIa(int xp, int I, int alpha, vector< vector<double> > &psv);
-  virtual double CC(int num, vector< vector<double> > &psv, int func);
-  virtual void BoundaryCondition();
+  //virtual double H(vector<double> &X, vector<double> &P);
+  //virtual double DI(int xp, int I, vector< vector<double> > &psv);
+  //virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
+  //virtual double gIa(int xp, int I, int alpha, vector< vector<double> > &psv);
+  //virtual double CC(int num, vector< vector<double> > &psv, int func);
+  //virtual void BoundaryCondition();
+  //virtual bool EndSurface(vector< vector<double> > &psv);
 };
 
 #endif

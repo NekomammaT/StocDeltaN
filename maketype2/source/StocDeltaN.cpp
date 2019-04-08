@@ -95,15 +95,16 @@ void StocDeltaN::solve()
       }
 
       dN2data.push_back({ssdn.return_intf(0),ssdn.return_intf(1)});
-      
-      if (xpdim == 1) {
-	if (ssdn.return_V() < rhoc) {
-	  break;
+
+      vector< vector<double> > PSV0(xpdim, vector<double>(Idim,0));
+      for (int xp=0; xp<xpdim; xp++) {
+	for (int I=0; I<Idim; I++) {
+	  PSV0[xp][I] = ssdn.return_xp(xp,I);
 	}
-      } else {
-	if (3*ssdn.return_H()*ssdn.return_H() < rhoc) {
+      }
+
+      if (!EndSurface(PSV0)) {
 	  break;
-	}
       }
     }
 
@@ -168,7 +169,7 @@ void StocDeltaN::sample()
   } else if (xpdim == 2) {
     Hi = return_H();
   }
-
+  
   string str = "sample_" + model + ".dat";
   ofstream ofs(str);
   double dt = timestep;
@@ -219,14 +220,8 @@ void StocDeltaN::sample()
       }
     }
     
-    if (xpdim == 1) {
-      if (return_V() < rhoc) {
-	break;
-      }
-    } else {
-      if (3*return_H()*return_H() < rhoc) {
-	break;
-      }
+    if (!EndSurface(xx)) {
+      break;
     }
   }
 
@@ -243,8 +238,8 @@ void StocDeltaN::sample()
       cout << "[" << xxi[1][I] << ", " << xx[1][I] << ", " << xmin[1][I] << ", "
 	   << xmax[1][I] << "]" << endl;
     }
+    cout << endl;
   }
-  cout << endl;
 
   cout << "N = " << return_t() << endl;
   cout << setprecision(17);
@@ -591,6 +586,7 @@ void StocDeltaN::f_loglinearplot(int func)
 	g.ylabel(string("$<N>$"));
       } else if (func == 1) {
 	g.ylabel(string("$<\\delta N^2>$"));
+	g.ylog();
       }
       g.xlog();
       g.plot(site[0][0],ff[func],1,string("b"));

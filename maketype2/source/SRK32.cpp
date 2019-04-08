@@ -94,34 +94,40 @@ double SRKintegrater::derGamma(vector<double> &X, int I, int J, int K, int L) {
 
 double SRKintegrater::DI(int xp, int I, vector< vector<double> > &psv)
 {
-  double DI;
+  double DI = 0;
 
-  if (xp == 0) {
-    DI = 0;
-    
+  if (xpdim == 1) {
     for (int J=0; J<Idim; J++) {
-      DI += inversemetric(psv[0],I,J)*psv[1][J]/H(psv[0],psv[1]);
-
-      for (int K=0; K<Idim; K++) {
-	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
-      }
+      DI -= inversemetric(psv[0],I,J)*VI(psv[0],J)/V(psv[0]);
     }
-  } else {
-    double Hubble = H(psv[0],psv[1]);
-    DI = -3*psv[1][I]-VI(psv[0],I)/Hubble;
-
-    for (int J=0; J<Idim; J++) {
-      for (int K=0; K<Idim; K++) {
-	DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv);
-
-	for (int S=0; S<Idim; S++) {
-	  DI += affine(psv[0],S,I,J)*inversemetric(psv[0],J,K)*psv[1][K]*psv[1][S]/Hubble
-	    +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv);
-
-	  for (int R=0; R<Idim; R++) {
-	    DI -= 1./2*(affine(psv[0],R,J,K)*affine(psv[0],S,I,R)
-			+ affine(psv[0],R,I,J)*affine(psv[0],S,K,R))
-	      *psv[1][S]*DIJ(0,J,0,K,psv);
+  } else if (xpdim == 2) {
+    if (xp == 0) {
+      DI = 0;
+      
+      for (int J=0; J<Idim; J++) {
+	DI += inversemetric(psv[0],I,J)*psv[1][J]/H(psv[0],psv[1]);
+	
+	for (int K=0; K<Idim; K++) {
+	  DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
+	}
+      }
+    } else {
+      double Hubble = H(psv[0],psv[1]);
+      DI = -3*psv[1][I]-VI(psv[0],I)/Hubble;
+      
+      for (int J=0; J<Idim; J++) {
+	for (int K=0; K<Idim; K++) {
+	  DI += affine(psv[0],J,I,K)*DIJ(0,K,1,J,psv);
+	  
+	  for (int S=0; S<Idim; S++) {
+	    DI += affine(psv[0],S,I,J)*inversemetric(psv[0],J,K)*psv[1][K]*psv[1][S]/Hubble
+	      +1./2*derGamma(psv[0],S,I,J,K)*psv[1][S]*DIJ(0,J,0,K,psv);
+	    
+	    for (int R=0; R<Idim; R++) {
+	      DI -= 1./2*(affine(psv[0],R,J,K)*affine(psv[0],S,I,R)
+			  + affine(psv[0],R,I,J)*affine(psv[0],S,K,R))
+		*psv[1][S]*DIJ(0,J,0,K,psv);
+	    }
 	  }
 	}
       }
@@ -135,31 +141,35 @@ double SRKintegrater::DIJ(int xpI, int I, int xpJ, int J,
 			  vector< vector<double> > &psv)
 {
   double DDIJ;
-
-  if (xpI == 0 && xpJ == 0) {
-    DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
-  } else if (xpI == 1 && xpJ == 1) {
-    DDIJ = 0;
-    for (int K=0; K<Idim; K++) {
-      for (int L=0; L<Idim; L++) {
-	for (int M=0; M<Idim; M++) {
-	  for (int N=0; N<Idim; N++) {
-	    DDIJ += affine(psv[0],K,I,L)*psv[1][K]*affine(psv[0],M,J,N)*psv[1][M]
-	      *DIJ(0,L,0,N,psv);
+  
+  if (xpdim == 1) {
+    DDIJ = V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
+  } else if (xpdim == 2) {
+    if (xpI == 0 && xpJ == 0) {
+      DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
+    } else if (xpI == 1 && xpJ == 1) {
+      DDIJ = 0;
+      for (int K=0; K<Idim; K++) {
+	for (int L=0; L<Idim; L++) {
+	  for (int M=0; M<Idim; M++) {
+	    for (int N=0; N<Idim; N++) {
+	      DDIJ += affine(psv[0],K,I,L)*psv[1][K]*affine(psv[0],M,J,N)*psv[1][M]
+		*DIJ(0,L,0,N,psv);
+	    }
 	  }
 	}
       }
-    }
-  } else if (xpI == 0) {
-    DDIJ = 0;
-    
-    for (int K=0; K<Idim; K++) {
-      for (int L=0; L<Idim; L++) {
-	DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv);
+    } else if (xpI == 0) {
+      DDIJ = 0;
+      
+      for (int K=0; K<Idim; K++) {
+	for (int L=0; L<Idim; L++) {
+	  DDIJ += affine(psv[0],K,J,L)*psv[1][K]*DIJ(0,I,0,L,psv);
+	}
       }
+    } else {
+      DDIJ = DIJ(xpJ,J,xpI,I,psv);
     }
-  } else {
-    DDIJ = DIJ(xpJ,J,xpI,I,psv);
   }
   
   return DDIJ;
@@ -169,14 +179,18 @@ double SRKintegrater::gIa(int xp, int I, int alpha, vector< vector<double> > &ps
 {
   double ggIa;
   
-  if (xp == 0) {
-    ggIa = H(psv[0],psv[1])/2./M_PI * vielbein(psv,I,alpha);
-  } else if (xp == 1) {
-    ggIa = 0;
-    
-    for (int J=0; J<Idim; J++) {
-      for (int K=0; K<Idim; K++) {
-	ggIa += affine(psv[0],K,I,J)*psv[1][K]*gIa(0,J,alpha,psv);
+  if (xpdim == 1) {
+    ggIa = sqrt(V(psv[0])/3.)/2./M_PI * vielbein(psv,I,alpha);
+  } else if (xpdim == 2) {
+    if (xp == 0) {
+      ggIa = H(psv[0],psv[1])/2./M_PI * vielbein(psv,I,alpha);
+    } else if (xp == 1) {
+      ggIa = 0;
+      
+      for (int J=0; J<Idim; J++) {
+	for (int K=0; K<Idim; K++) {
+	  ggIa += affine(psv[0],K,I,J)*psv[1][K]*gIa(0,J,alpha,psv);
+	}
       }
     }
   }
