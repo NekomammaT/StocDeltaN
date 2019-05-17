@@ -1,3 +1,4 @@
+<!--
 # StocDeltaN
 StocDeltaN is a numerical solver of the stochastic-delta N formalism written in C++.
 
@@ -37,3 +38,4 @@ Obtained results are output into three files named `Mn_"model name".dat`, `traj_
     
 * `calP_"model name".dat` : data of curvature perturbation  
 `<N>, <\delta N^2>, \mathcal{P}_\zeta`
+-->
