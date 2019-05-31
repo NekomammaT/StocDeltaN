@@ -104,7 +104,7 @@ void StocDeltaN::solve()
       }
 
       if (!EndSurface(PSV0)) {
-	  break;
+	break;
       }
     }
 
