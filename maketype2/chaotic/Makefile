@@ -1,4 +1,4 @@
-MODEL = chaotic_conf
+MODEL = chaotic_SR
 SOURCE = ../source
 
 CXX := g++-8

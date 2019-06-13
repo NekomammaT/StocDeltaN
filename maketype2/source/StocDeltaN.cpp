@@ -196,9 +196,12 @@ void StocDeltaN::sample()
     }
     ofs << setprecision(17);
     if (xpdim == 1) {
-      ofs << return_V();
+      ofs << return_V() << ' ';
     } else if (xpdim == 2) {
-      ofs << return_H();
+      ofs << return_H() << ' ';
+    }
+    if (Idim == 2) {
+      ofs << return_etaperp();
     }
     ofs << endl;
 

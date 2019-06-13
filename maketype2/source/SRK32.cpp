@@ -99,6 +99,10 @@ double SRKintegrater::DI(int xp, int I, vector< vector<double> > &psv)
   if (xpdim == 1) {
     for (int J=0; J<Idim; J++) {
       DI -= inversemetric(psv[0],I,J)*VI(psv[0],J)/V(psv[0]);
+
+      for (int K=0; K<Idim; K++) {
+	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
+      }
     }
   } else if (xpdim == 2) {
     if (xp == 0) {
@@ -443,6 +447,45 @@ double SRKintegrater::eIs(vector< vector<double> > &XP, int I, int alpha)
   }
   
   return vIs[I][alpha]/sqrt(Norm);
+}
+
+// only for 2-field model
+double SRKintegrater::eta_perp(vector< vector<double> > &XP)
+{
+  double Vs = 0;
+
+  for (int I=0; I<Idim; I++) {
+    Vs += VI(XP[0],I)*eIs(XP,I,1);
+  }
+
+  double sigmadot = 0;
+
+  if (xpdim == 1) {
+    for (int I=0; I<Idim; I++) {
+      for (int J=0; J<Idim; J++) {
+	sigmadot += inversemetric(XP[0],I,J)*VI(XP[0],I)*VI(XP[0],J)/3./V(XP[0]);
+      }
+    }
+  } else {
+    for (int I=0; I<Idim; I++) {
+      for (int J=0; J<Idim; J++) {
+	sigmadot += inversemetric(XP[0],I,J)*XP[1][I]*XP[1][J]; ////////////
+      }
+    }
+  }
+
+  sigmadot = sqrt(sigmadot);
+
+  if (xpdim == 1) {
+    return Vs/sqrt(V(XP[0])/3.)/sigmadot;
+  } else {
+    return Vs/H(XP[0],XP[1])/sigmadot;
+  }
+}
+
+double SRKintegrater::return_etaperp()
+{
+  return eta_perp(xx);
 }
 
 

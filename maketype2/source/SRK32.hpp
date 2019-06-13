@@ -34,6 +34,8 @@ public:
   double vielbein(vector< vector<double> > &XP, int I, int alpha);
   double eIsigma(vector< vector<double> > &XP, int I);
   double eIs(vector< vector<double> > &XP, int I, int alpha);
+  double eta_perp(vector< vector<double> > &XP); // only for 2-field model
+  double return_etaperp();
   virtual double H(vector<double> &X, vector<double> &P);
   virtual double V(vector<double> &X);
   virtual double VI(vector<double> &X, int I);

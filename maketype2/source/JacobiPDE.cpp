@@ -104,6 +104,10 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
   if (xpdim == 1) {
     for (int J=0; J<Idim; J++) {
       DI -= inversemetric(psv[0],I,J)*VI(psv[0],J)/V(psv[0]);
+
+      for (int K=0; K<Idim; K++) {
+	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
+      }
     }
   } else if (xpdim == 2) {
     if (xp == 0) {
@@ -389,6 +393,8 @@ JacobiPDE::JacobiPDE(vector< vector< vector<double> > > &Site, vector<double> &P
 					  vector< vector<double> >(xpdim,
 								   vector<double>(Idim,0)));
   hm = hp;
+
+  BoundaryCondition();
 }
 
 double JacobiPDE::PDE_1step(int num, int func)

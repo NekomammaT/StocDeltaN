@@ -3,12 +3,12 @@
 
 #define MODEL "orbital"
 
-#define RHOMIN 0.99
-#define RHOMAX 1.01
+#define RHOMIN 1.23
+#define RHOMAX 1.24
 #define HRHO (1e-3)
 #define THETAMIN 1
-#define THETAMAX 13
-#define HTHETA 1
+#define THETAMAX 15
+#define HTHETA 1 //0.1
 #define RPIMIN -(1e-10)
 #define RPIMAX (1e-10)
 #define HRPI (1e-11)
@@ -16,7 +16,7 @@
 #define TPIMAX -(7e-6)
 #define HTPI (1e-6)
 
-#define MAXSTEP 100000
+#define MAXSTEP 10000000
 #define TOL 1e-10
 
 #define MM (1e-5)
@@ -24,14 +24,14 @@
 #define RHOC (MM*MM)
 
 #define RECURSION 100
-#define RHOIN 1
+#define RHOIN 1.2356
 #define RPIIN 0
-#define THETAIN 10
-#define TPIIN -sqrt(2./3)*MM
+#define THETAIN 13.5908
+#define TPIIN (-sqrt(2./3)*MM)
 #define TIMESTEP (1e-2)
 
 #define DELTAN 0.1
-#define NMAX 24
+#define NMAX 65
 
 
 int main(int argc, char** argv)
@@ -83,8 +83,7 @@ int main(int argc, char** argv)
   site.clear();
   xpsite.clear();
 
-  vector<double> params = {MAXSTEP,TOL,2,RHOC,(double)sitepack[0].size(),TIMESTEP,NMAX,DELTAN,
-			   RECURSION};
+  vector<double> params = {MAXSTEP,TOL,2,RHOC,(double)sitepack[0].size(),TIMESTEP,NMAX,DELTAN,RECURSION};
 
   vector< vector<double> > xpi = {{RHOIN,THETAIN},{RPIIN,TPIIN}};
 
@@ -114,7 +113,7 @@ double StocDeltaN::V(vector<double> &X)
 double StocDeltaN::VI(vector<double> &X, int I) // \partial_I V
 {
   if (I == 0) {
-    return 2*MM*MM/3./X[0]/X[0];
+    return 2*MM*MM/3./X[0]/X[0]/X[0];
   } else {
     return MM*MM*X[1];
   }

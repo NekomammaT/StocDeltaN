@@ -11,11 +11,11 @@
 #define PMAX 0
 #define HXOV (1./20)
 #define HXMAX 0.1
-#define HXMIN (1e-4)
+#define HXMIN (1e-5)
 #define HPOV (1./20)
 #define HPMIN (1e-10)
 
-#define MAXSTEP 2
+#define MAXSTEP 1000000
 #define TOL 1e-10
 
 #define AW 0.02

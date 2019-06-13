@@ -1,4 +1,4 @@
-MODEL = orbital_flat_highH
+MODEL = orbital
 SOURCE = ../source
 
 CXX := g++-8
