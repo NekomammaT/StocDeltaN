@@ -1,4 +1,4 @@
-MODEL = USR
+MODEL = USR_log
 SOURCE = ../source
 
 CXX := g++-8
