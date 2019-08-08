@@ -1,7 +1,7 @@
-MODEL = USR_log
+MODEL = USR
 SOURCE = ../source
 
-CXX := g++-8
+CXX := g++-9
 CXXFLAGS := -std=c++11 -O3 -fopenmp
 
 $(MODEL): $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o

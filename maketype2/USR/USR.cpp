@@ -3,8 +3,8 @@
 
 #define MODEL "USR"
 
-#define XMIN 0.04
-#define XMAX 0.2
+#define XMIN 0.04 - XF
+#define XMAX 0.2 - XF
 #define PMIN -(1e-10)
 #define PMAX 0
 #define HXMIN (1e-8)
@@ -21,7 +21,7 @@
 #define RHOC V0
 
 #define RECURSION 100
-#define XIN 0.1 
+#define XIN 0.1 - XF
 #define PIN -(1e-11)
 #define TIMESTEP (1e-3)
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
   vector< vector<double> > xpsite;
   vector< vector< vector<double> > > sitepack;
   while (sitev <= XMAX) {
-    h = max(fabs(sitev-XF)*HXOV,HXMIN);
+    h = max(fabs(sitev)*HXOV,HXMIN);
 
     site.push_back(sitev);
     sitev += h;
@@ -71,13 +71,13 @@ int main(int argc, char** argv)
 
   StocDeltaN sdn(MODEL,sitepack,xpi,0,params);
   
-  //sdn.sample();
-  //sdn.sample_loglogplot();
+  sdn.sample();
+  sdn.sample_loglogplot();
   
-  sdn.solve();
-  sdn.f_loglogplot(0);
-  sdn.f_loglogplot(1);
-  sdn.calP_plot();
+  //sdn.solve();
+  //sdn.f_loglogplot(0);
+  //sdn.f_loglogplot(1);
+  //sdn.calP_plot();
 
   gettimeofday(&tv, &tz);
   after = (double)tv.tv_sec + (double)tv.tv_usec * 1e-6;
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
 double StocDeltaN::V(vector<double> &X)
 {
-  if (X[0] > XF) {
+  if (X[0] > 0) {
     return V0;
   } else {
     return 0;
