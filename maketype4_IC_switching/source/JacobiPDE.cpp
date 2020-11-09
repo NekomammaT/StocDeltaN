@@ -3,7 +3,7 @@
 // ------------------- user decision -----------------------
 // ---------------------------------------------------------
 
-double JacobiPDE::H(vector<double> &X, vector<double> &P)
+double JacobiPDE::H(vector<double> &X, vector<double> &P) // Hubble parameter
 {
   double rho = V(X);
 
@@ -16,7 +16,7 @@ double JacobiPDE::H(vector<double> &X, vector<double> &P)
   return sqrt(rho/3.);
 }
 
-double JacobiPDE::V(vector<double> &X)
+double JacobiPDE::V(vector<double> &X) // potential
 {
   double m1 = 0.01;
   double m2 = 0.1;
@@ -24,7 +24,7 @@ double JacobiPDE::V(vector<double> &X)
   return 1./2*m1*m1*X[0]*X[0] + 1./2*m2*m2*X[1]*X[1];
 }
 
-double JacobiPDE::VI(vector<double> &X, int I)
+double JacobiPDE::VI(vector<double> &X, int I) // \partial_I V
 {
   double m1 = 0.01;
   double m2 = 0.1;
@@ -36,7 +36,7 @@ double JacobiPDE::VI(vector<double> &X, int I)
   }
 }
 
-double JacobiPDE::metric(vector<double> &X, int I, int J)
+double JacobiPDE::metric(vector<double> &X, int I, int J) // field-space metric G_IJ
 {
   double MM = 1e-3;
 
@@ -49,7 +49,7 @@ double JacobiPDE::metric(vector<double> &X, int I, int J)
   }
 }
 
-double JacobiPDE::inversemetric(vector<double> &X, int I, int J)
+double JacobiPDE::inversemetric(vector<double> &X, int I, int J) // inverse field-space metric G^IJ
 {
   double MM = 1e-3;
 
@@ -62,7 +62,7 @@ double JacobiPDE::inversemetric(vector<double> &X, int I, int J)
   }
 }
 
-double JacobiPDE::affine(vector<double> &X, int I, int J, int K)
+double JacobiPDE::affine(vector<double> &X, int I, int J, int K) // Christoffesl symbol Gamma^I_JK
 {
   double MM = 1e-3;
 
@@ -75,7 +75,7 @@ double JacobiPDE::affine(vector<double> &X, int I, int J, int K)
   }
 }
 
-double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L)
+double JacobiPDE::derGamma(vector<double> &X, int I, int J, int K, int L) // Gamma^I_{JK,L}
 {
   double MM = 1e-3;
 
@@ -101,7 +101,7 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
 {
   double DI = 0;
 
-  if (xpdim == 1) {
+  if (xpdim == 1) { // slow-roll field-space
     for (int J=0; J<Idim; J++) {
       DI -= inversemetric(psv[0],I,J)*VI(psv[0],J)/V(psv[0]);
 
@@ -109,7 +109,7 @@ double JacobiPDE::DI(int xp, int I, vector< vector<double> > &psv)
 	DI -= 1./2*affine(psv[0],I,J,K)*DIJ(0,J,0,K,psv);
       }
     }
-  } else if (xpdim == 2) {
+  } else if (xpdim == 2) { // full phase-space
     if (xp == 0) {
       DI = 0;
       
@@ -150,10 +150,10 @@ double JacobiPDE::DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &
 {
   double DDIJ;
   
-  if (xpdim == 1) {
+  if (xpdim == 1) { // slow-roll field-space
     DDIJ = V(psv[0])/12./M_PI/M_PI * inversemetric(psv[0],I,J);
-  } else if (xpdim == 2) {
-    if (xpI == 0 && xpJ == 0) {
+  } else if (xpdim == 2) { // full phase-space
+    if (xpI == 0 && xpJ == 0) { 
       DDIJ = H(psv[0],psv[1])*H(psv[0],psv[1])/4./M_PI/M_PI * inversemetric(psv[0],I,J);
     } else if (xpI == 1 && xpJ == 1) {
       DDIJ = 0;
@@ -187,9 +187,9 @@ double JacobiPDE::CC(int num, vector< vector<double> > &psv, int func)
 {
   double CC = 0;
   
-  if (func == 0) {
+  if (func == 0) { // for <N>
     CC = -1;
-  } else if (func == 1) {
+  } else if (func == 1) { // for <delta N^2>
     for (int xpI=0; xpI<xpdim; xpI++) {
       for (int I=0; I<Idim; I++) {
 	for (int xpJ=0; xpJ<xpdim; xpJ++) {
@@ -208,29 +208,29 @@ double JacobiPDE::CC(int num, vector< vector<double> > &psv, int func)
 }
 // ---------------------------------------------------------
 
-void JacobiPDE::BoundaryCondition()
+void JacobiPDE::BoundaryCondition() // set boundary condition
 {
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (int number=0; number<volume; number++) {
-    vector< vector<double> > PSV0(xpdim, vector<double>(Idim,0));
+    vector< vector<double> > PSV0(xpdim, vector<double>(Idim,0)); // temporal variable for phase-space value
 
     for (int xp=0; xp<xpdim; xp++) {
       for (int I=0; I<Idim; I++) {
-	PSV0[xp][I] = No2PSV(number,xp,I);
+	PSV0[xp][I] = No2PSV(number,xp,I); // extract phase-space value of site[number]
       }
     }
     
-    if (EndSurface(PSV0)) {
-      Omega[number] = true;
+    if (EndSurface(PSV0)) { // if the site is in inflationary region
+      Omega[number] = true; // to be solved
       for (int func=0; func<funcNo; func++) {
-	ff[func][number] = rand()%1;
+	ff[func][number] = rand()%1; // set IC for function f randomly
       }
     } else {
-      Omega[number] = false;
+      Omega[number] = false; // no to be solved
       for (int func=0; func<funcNo; func++) {
-	ff[func][number] = 0;
+	ff[func][number] = 0; // Set f to be 0. Particularly f should be 0 on the end of inflation hypersurface
       }
     }
     
