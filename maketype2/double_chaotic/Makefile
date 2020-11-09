@@ -1,8 +1,8 @@
 MODEL = double_chaotic_SR
 SOURCE = ../source
 
-CXX := g++-8
-CXXFLAGS := -std=c++11 -O3 -fopenmp
+CXX := g++-9
+CXXFLAGS := -std=c++11 -O3 #-fopenmp
 
 $(MODEL): $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o
 	$(CXX) $(CXXFLAGS) -o $(MODEL) $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o
