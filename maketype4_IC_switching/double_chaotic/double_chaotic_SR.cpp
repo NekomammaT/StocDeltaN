@@ -66,13 +66,13 @@ int main(int argc, char** argv)
 
   StocDeltaN sdn(MODEL,sitepack,xpi,0,params);
 
-  sdn.sample(); 
+  //sdn.sample(); 
   //sdn.sample_plot();
 
-  //sdn.solve();
-  //sdn.f_plot(0);
-  //sdn.f_plot(1);
-  //sdn.calP_plot();
+  sdn.solve();
+  sdn.f_plot(0);
+  sdn.f_plot(1);
+  sdn.calP_plot();
 
   gettimeofday(&tv, &tz);
   after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
