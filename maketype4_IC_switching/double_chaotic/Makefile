@@ -5,7 +5,6 @@ CXX := g++-10 # c++ compiler
 CXXFLAGS := -std=c++11 -O3 -fopenmp
 # Compiler option. Turn on -fopenmp for parallel computation
 
-
 $(MODEL): $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o
 	$(CXX) $(CXXFLAGS) -o $(MODEL) $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o
 
