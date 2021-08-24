@@ -1,3 +1,5 @@
+// partial differential equation solver with use of Jacobi method
+
 #ifndef INCLUDED_JacobiPDE_hpp_
 #define INCLUDED_JacobiPDE_hpp_
 
@@ -67,6 +69,8 @@ public:
   virtual double inversemetric(vector<double> &X, int I, int J); // inverse field-space metric G^IJ
   virtual double affine(vector<double> &X, int I, int J, int K); // Christoffel symbol Gamma^I_JK
   virtual double derGamma(vector<double> &X, int I, int J, int K, int L); // Gamma^I_{JK,L}
+
+  // ----------------------------------------------------------------
   virtual double DI(int xp, int I, vector< vector<double> > &psv); 
   virtual double DIJ(int xpI, int I, int xpJ, int J, vector< vector<double> > &psv);
   virtual double CC(int num, vector< vector<double> > &psv, int func);
@@ -74,6 +78,8 @@ public:
     solve PDE :
     (DI(xp,I) \partial_xpI + 1./2 DIJ(xpI,xpJ) \partial_xpI \partial_xpJ) f = CC
   */
+  // ---------------------------------------------------------------
+  
   virtual void BoundaryCondition(); // set boundary condition
   virtual bool EndSurface(vector< vector<double> > &psv); // judge phase-space point psv is in the inflationary range or not
 };

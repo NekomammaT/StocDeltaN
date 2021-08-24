@@ -1,41 +1,54 @@
 #include "../source/StocDeltaN.hpp"
 #include <sys/time.h>
 
-#define MODEL "double_chaotic_SR"
+#define MODEL "double_chaotic_SR" // model name
 
+// ---------- box size & step h --------------
 #define PHIMIN -5
 #define PHIMAX 20
 #define PSIMIN 0
 #define PSIMAX 20
 #define HPHI 0.1
 #define HPSI 0.1
+// -------------------------------------------
 
-#define MAXSTEP 100000
-#define TOL 1e-10
+// ---------- for PDE ------------------------
+#define MAXSTEP 100000 // max recursion
+#define TOL 1e-10 // tolerance
+// -------------------------------------------
 
+// ---------- potential parameter ------------
 #define MPHI (1e-5)
 #define MPSI (MPHI/9.)
+// -------------------------------------------
 
-#define RHOC (MPSI*MPSI)
+#define RHOC (MPSI*MPSI) // energy density at the end of inflation
 
-#define RECURSION 100
-#define PHIIN 13
-#define PSIIN 13
-#define TIMESTEP (1e-2)
+// ---------- for SDE ------------------------
+#define RECURSION 100 // recursion for power spectrum
+#define PHIIN 13 // i.c. for phi
+#define PSIIN 13 // i.c. for psi
+#define TIMESTEP (1e-2) // time step : delta N
+// -------------------------------------------
 
-#define DELTAN 0.1
-#define NMAX 80
-#define NCUT 300
+// ---------- for power spectrum -------------
+#define DELTAN 0.1 // calc. PS every DELTAN e-folds
+#define NMAX 80 // calc. PS for 0--NMAX e-folds
+// -------------------------------------------
+
+//#define NCUT 300
 
 
 int main(int argc, char** argv)
 {
+  // ---------------- start stop watch --------------
   struct timeval tv;
   struct timezone tz;
   double before, after;
   
   gettimeofday(&tv, &tz);
-  before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6; // start stop watch
+  before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  // ------------------------------------------------
 
 
   double h = HPHI, sitev = PHIMIN;
@@ -60,7 +73,8 @@ int main(int argc, char** argv)
   sitepack.push_back(xsite);
   xsite.clear();
 
-  vector<double> params = {MAXSTEP,TOL,2,RHOC,(double)sitepack[0].size(),TIMESTEP,NMAX,DELTAN,RECURSION,NCUT};
+  vector<double> params = {MAXSTEP,TOL,2,RHOC,(double)sitepack[0].size(),TIMESTEP,
+			   NMAX,DELTAN,RECURSION,NCUT};
 
   vector< vector<double> > xpi = {{PHIIN,PSIIN}};
 
