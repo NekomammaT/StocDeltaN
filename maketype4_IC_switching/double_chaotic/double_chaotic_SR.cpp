@@ -36,7 +36,7 @@
 #define NMAX 80 // calc. PS for 0--NMAX e-folds
 // -------------------------------------------
 
-//#define NCUT 300
+#define NCUT 300
 
 
 int main(int argc, char** argv)

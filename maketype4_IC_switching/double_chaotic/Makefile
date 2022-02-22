@@ -1,8 +1,10 @@
-MODEL = double_chaotic_SR # main file name "MODEL.cpp"
-SOURCE = ../source # source directory
+MODEL = double_chaotic_SR
+# main file name "MODEL.cpp"
+SOURCE = ../source
+# source directory
 
-CXX := g++-10 # c++ compiler
-CXXFLAGS := -std=c++11 -O3 -fopenmp
+CXX := g++ #-11 # c++ compiler
+CXXFLAGS := -std=c++11 -O3 -Xpreprocessor -fopenmp -lomp
 # Compiler option. Turn on -fopenmp for parallel computation
 
 $(MODEL): $(MODEL).o $(SOURCE)/JacobiPDE.o $(SOURCE)/SRK32.o $(SOURCE)/StocDeltaN.o
