@@ -194,7 +194,7 @@ void StocDeltaN::solve()
   for (int i=0; i<recursion; i++) {
     StocDeltaN ssdn = *this;
     vector< vector<double> > dN2data;
-    double dN2, dataNo;
+    double dN2, dN2error, dataNo;
 
     while (true) {
       ssdn.SRK2(dt);
@@ -247,18 +247,28 @@ void StocDeltaN::solve()
     for (double N=0; N<Nmax; N+=deltaN) {
       dN2 = 0;
       dataNo = 0;
+      dN2error = 0;
 
       for (int list=0; list<dN2data.size(); list++) {
 	if (N < N0-dN2data[list][0] && N0-dN2data[list][0] < N+deltaN) {
 	  dN2 += dN2data[list][1];
+	  dN2error += dN2data[list][1]*dN2data[list][1];
 	  dataNo++;
 	}
       }
 
       if (dataNo != 0) {
 	dN2 /= dataNo;
+	dN2error /= dataNo;
       }
-      dN2List[i].push_back({N,dN2});
+
+      dN2error -= dN2*dN2;
+
+      if (dataNo != 0) {
+	dN2error /= dataNo;
+      }
+      
+      dN2List[i].push_back({N,dN2,sqrt(dN2error)});
     }
 
 #ifdef _OPENMP
@@ -271,26 +281,37 @@ void StocDeltaN::solve()
   }
   cout << endl;
 
-  double meandN2, predN2 = 0;
+  double meandN2, predN2 = 0, weightw, prew = 0, aerror;
   str = "calP_" + model + ".dat";
   ofstream calPfile(str);
 
   for (int list=0; list<dN2List[0].size(); list++) {
     meandN2 = 0;
-    recNo = 0;
+    weightw = 0;
 
     for (int i=0; i<recursion; i++) {
-      meandN2 += dN2List[i][list][1];
-      if (dN2List[i][list][1] != 0) {
-	recNo++;
+      if (dN2List[i][list][2] != 0) {
+	meandN2 += dN2List[i][list][1]/dN2List[i][list][2]/dN2List[i][list][2];
+	weightw += 1./dN2List[i][list][2]/dN2List[i][list][2];
       }
     }
 
-    meandN2 /= recNo;
-    calPfile << dN2List[0][list][0] << ' ' << (meandN2-predN2)/deltaN << endl;
+    meandN2 /= weightw;
+    aerror = 0;
+    if (weightw != 0) {
+      aerror += 1/weightw;
+    }
+    if (prew != 0) {
+      aerror += 1/prew;
+    }
+    
+    calPfile << dN2List[0][list][0] << ' '
+	     << (meandN2-predN2)/deltaN << ' '
+	     << sqrt(aerror)/deltaN  << endl;
     Ndata.push_back(dN2List[0][list][0]);
     calPdata.push_back((meandN2-predN2)/deltaN);
     predN2 = meandN2;
+    prew = weightw;
   }
 }
 
