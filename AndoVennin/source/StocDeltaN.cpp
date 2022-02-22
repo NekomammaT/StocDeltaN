@@ -227,7 +227,6 @@ void StocDeltaN::solve()
 	}
       }
 
-      //dN2data.push_back({ssdn.return_intf(0),ssdn.return_intf(1)});
       dN2data.push_back({ssdn.return_t(),ssdn.return_intf(1)});
 
       vector< vector<double> > PSV0(xpdim, vector<double>(Idim,0));
