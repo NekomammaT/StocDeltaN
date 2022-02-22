@@ -39,8 +39,8 @@
 // -----------------------------------------
 
 // ---------- for power spectrum -----------
-#define DELTAN 0.1 // calc. PS every DELTAN e-folds
-#define NMAX 28 // calc. PS for 0--NMAX e-folds
+#define DELTAN 0.5 // 0.1 // calc. PS every DELTAN e-folds
+#define NMAX 25 // 28 // calc. PS for 0--NMAX e-folds
 // -----------------------------------------
 
 

@@ -18,13 +18,14 @@ protected:
   // recursion : number of sample paths for power spectrum calculation
   // xpdim : xpdim=1 -> slow-roll field-space, xpdim=2 -> full phase-space
   // Idim : number of inflatons
-  vector<double> x1traj,p1traj,x2traj,Ntraj,Ndata,calPdata;
+  vector<double> x1traj,p1traj,x2traj,Ntraj,Ndata,calPdata,calPerror;
   // x1traj : trajectory of phi^1 for plotting
   // p1traj : trajectory of pi_1
   // x2traj : trajectory of phi^2
   // Ntraj : trajectory of e-folding time N
   // Ndata : data variable for <N> in power spectrum calculation
   // calPdata : data variable for power spectrum
+  // calPerror : error data of calP
   
 public:
   StocDeltaN(){}
