@@ -44,6 +44,29 @@ void matplotlibcpp::ylabel(string label)
   fprintf(p, "plt.ylabel(\"%s\")\n", label.c_str());
 }
 
+void matplotlibcpp::yerror(vector<double> X, vector<double> Y, vector<double> Yerr)
+{
+  if (X.size() == Y.size() && Y.size() == Yerr.size()) {
+    if (!isnan(X[0]) && !isnan(Y[0])) {
+      fprintf(p, "plt.plot([%f", X[0]);
+    }
+    for (int i=1; i<X.size(); i++) {
+      if (!isnan(X[i]) && !isnan(Y[i])) {
+	fprintf(p, ",%e", X[i]);
+      }
+    }
+    if (!isnan(X[0]) && !isnan(Y[0])) {
+      fprintf(p, "],[%f", Y[0]);
+    }
+    for (int i=1; i<Y.size(); i++) {
+      if (!isnan(X[i]) && !isnan(Y[i])) {
+	fprintf(p, ",%e", Y[i]);
+      }
+    }
+    fprintf(p, "], lw=%f, color=\"%s\")\n", lw, color.c_str());
+  }
+}
+
 void matplotlibcpp::plot(vector<double> X, vector<double> Y, double lw, string color)
 {
   if (X.size() == Y.size()) {
