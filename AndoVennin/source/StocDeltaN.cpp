@@ -858,7 +858,7 @@ void StocDeltaN::calP_plot()
   g.xlabel(string("$<N>$"));
   g.ylabel(string("$\\mathcal{P}_\\zeta$"));
   g.ylog();
-  g.plot(Ndata,calPdata,1,string("b"));
+  g.yerrorbar(Ndata,calPdata,calPerror,2,string("o"),4,string("black"),string("black"),string("w"));
   g.save(filename);
   g.show();
   g.close();

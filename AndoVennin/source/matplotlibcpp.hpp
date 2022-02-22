@@ -18,6 +18,7 @@ public:
   void open();
   void xlabel(string label);
   void ylabel(string label);
+  void yerrorbar(vector<double> X, vector<double> Y, vector<double> Yerr, double capsize, string fmt, double markersize, string ecolor, string markeredgecolor, string color);
   void plot(vector<double> X, vector<double> Y, double lw, string color);
   void xlog();
   void ylog();
@@ -44,26 +45,34 @@ void matplotlibcpp::ylabel(string label)
   fprintf(p, "plt.ylabel(\"%s\")\n", label.c_str());
 }
 
-void matplotlibcpp::yerror(vector<double> X, vector<double> Y, vector<double> Yerr)
+void matplotlibcpp::yerrorbar(vector<double> X, vector<double> Y, vector<double> Yerr, double capsize, string fmt, double markersize, string ecolor, string markeredgecolor, string color)
 {
   if (X.size() == Y.size() && Y.size() == Yerr.size()) {
-    if (!isnan(X[0]) && !isnan(Y[0])) {
-      fprintf(p, "plt.plot([%f", X[0]);
+    if (!isnan(X[0])) {
+      fprintf(p, "plt.errorbar([%e", X[0]);
     }
     for (int i=1; i<X.size(); i++) {
-      if (!isnan(X[i]) && !isnan(Y[i])) {
+      if (!isnan(X[i])) {
 	fprintf(p, ",%e", X[i]);
       }
     }
-    if (!isnan(X[0]) && !isnan(Y[0])) {
-      fprintf(p, "],[%f", Y[0]);
+    if (!isnan(Y[0])) {
+      fprintf(p, "], [%e", Y[0]);
     }
     for (int i=1; i<Y.size(); i++) {
-      if (!isnan(X[i]) && !isnan(Y[i])) {
+      if (!isnan(Y[i])) {
 	fprintf(p, ",%e", Y[i]);
       }
     }
-    fprintf(p, "], lw=%f, color=\"%s\")\n", lw, color.c_str());
+    if (!isnan(Yerr[0])) {
+      fprintf(p, "], yerr = [%e", Yerr[0]);
+    }
+    for (int i=1; i<Yerr.size(); i++) {
+      if (!isnan(Yerr[i])) {
+	fprintf(p, ",%e", Yerr[i]);
+      }
+    }
+    fprintf(p, "], capsize=%f, fmt=\"%s\", markersize=%f, ecolor=\"%s\", markeredgecolor=\"%s\", color=\"%s\")\n", capsize, fmt.c_str(), markersize, ecolor.c_str(), markeredgecolor.c_str(), color.c_str());
   }
 }
 
@@ -71,7 +80,7 @@ void matplotlibcpp::plot(vector<double> X, vector<double> Y, double lw, string c
 {
   if (X.size() == Y.size()) {
     if (!isnan(X[0]) && !isnan(Y[0])) {
-      fprintf(p, "plt.plot([%f", X[0]);
+      fprintf(p, "plt.plot([%e", X[0]);
     }
     for (int i=1; i<X.size(); i++) {
       if (!isnan(X[i]) && !isnan(Y[i])) {
@@ -79,7 +88,7 @@ void matplotlibcpp::plot(vector<double> X, vector<double> Y, double lw, string c
       }
     }
     if (!isnan(X[0]) && !isnan(Y[0])) {
-      fprintf(p, "],[%f", Y[0]);
+      fprintf(p, "],[%e", Y[0]);
     }
     for (int i=1; i<Y.size(); i++) {
       if (!isnan(X[i]) && !isnan(Y[i])) {

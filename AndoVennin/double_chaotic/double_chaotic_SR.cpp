@@ -32,7 +32,7 @@
 // -------------------------------------------
 
 // ---------- for power spectrum -------------
-#define DELTAN 0.1 // calc. PS every DELTAN e-folds
+#define DELTAN 1 // calc. PS every DELTAN e-folds
 #define NMAX 80 // calc. PS for 0--NMAX e-folds
 // -------------------------------------------
 
