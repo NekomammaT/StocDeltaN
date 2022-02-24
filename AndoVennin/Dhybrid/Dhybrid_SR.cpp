@@ -1,7 +1,7 @@
 #include "source/StocDeltaN.hpp"
 #include <sys/time.h>
 
-#define MODEL "hybrid_SR" // model name
+#define MODEL "Dhybrid_SR" // model name
 
 // ---------- box size & step h ------------
 #define PHIMIN 0.1409
@@ -13,7 +13,7 @@
 #define HPSIMIN (1e-10)
 //#define NCUT 50
 
-#define DWATER 1 // # of waterfalls
+#define DWATER 1000 // # of waterfalls
 // -----------------------------------------
 
 // ---------- for PDE ----------------------
@@ -36,7 +36,7 @@
 // ---------- for SDE ----------------------
 #define RECURSION 10000 // recursion for power spectrum
 #define PHIIN 0.1418 // i.c. for phi
-#define PSIIN 0 // i.c. for psi
+#define PSIIN 1e-10 //0 // i.c. for psi
 #define TIMESTEP (1e-3) // time step : delta N
 // -----------------------------------------
 
@@ -88,8 +88,9 @@ int main(int argc, char** argv)
   }; // set parameters
 
   vector< vector<double> > xpi = {{PHIIN,PSIIN}}; // set i.c. for inflationary trajectories
-  
-  StocDeltaN sdn(MODEL,sitepack,xpi,0,params); // declare the system
+
+  string model = string(MODEL) + string("_D=") + to_string(DWATER);
+  StocDeltaN sdn(model,sitepack,xpi,0,params); // declare the system
   
   //sdn.sample(); // obtain 1 sample path
   //sdn.sample_logplot(); // plot obtained sample path
@@ -160,7 +161,7 @@ double StocDeltaN::DI(int xp, int I, vector< vector<double> > &psv)
     return -VI(psv[0],I)/V(psv[0]);
   } else {
     return -VI(psv[0],I)/V(psv[0])
-      + V(psv[0])*(DWATER-1)/psv[0][I]/24./M_PI/M_PI;
+      + V(psv[0])*(DWATER-1)/abs(psv[0][I])/24./M_PI/M_PI;
   }
 }
 
