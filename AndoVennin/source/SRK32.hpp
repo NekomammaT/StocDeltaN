@@ -1,4 +1,4 @@
-// 3-step strong order 2 stochastic Runge-Kutta solver
+// 3-step order (2.0,1.0) strong stochastic Runge-Kutta solver
 
 #ifndef INCLUDED_SRK32_hpp_
 #define INCLUDED_SRK32_hpp_
